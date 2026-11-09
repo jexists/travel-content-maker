@@ -18,7 +18,7 @@
       "footer_font": "tmon_monsori.ttf",
       "header_size": 0.067,
       "footer_size": 0.083,
-      "margin_left": 0.066,
+      "margin_left": 0.05,
       "header_bottom": 0.151,
       "footer_bottom": 0.037,
       "header_underline": true,
