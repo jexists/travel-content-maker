@@ -6,7 +6,7 @@
     "sponsor_label": "협찬"
   },
   "instagram": {
-    "cards_min": 6, "cards_max": 10,
+    "cards_min": 1, "cards_max": 20,
     "cover_tags": 2,
     "caption_max": 2200,
     "hashtags_min": 5, "hashtags_max": 15,

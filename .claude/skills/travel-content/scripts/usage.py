@@ -28,8 +28,40 @@ def shorts_file(work, pid):
     raise SystemExit(f"영상 사진 {pid}가 best_insta·best_tistory에 없습니다. select를 먼저 실행하세요.")
 
 
+def build_v2(work):
+    """사용자가 고른 인스타 폴더 기준 (insta.json). 영상 = 인스타 순서, 티스토리 = 인스타 + 정보 사진."""
+    p = work_paths(work)
+    meta = load(p["work"] / "insta.json", {})
+    if "fixed" not in meta:
+        return None
+    insta = [f.stem.split("_")[-1] for f in sorted(p["best_insta"].glob("*.jpg"))]
+    tis = [f.stem.split("_")[-1] for f in sorted(p["best_tistory"].glob("*.jpg"))] if p["best_tistory"].exists() else []
+    src = {r["id"]: r for r in meta["fixed"]["photos"]}
+    # 사용자 폴더(insta_mine)이거나 20장 이하라 전부 쓴 경우 = 에디터가 고른 사진, AI가 20장을 고른 경우 = ai
+    mine_dir = meta["fixed"]["folder"].endswith("insta_mine")
+    insta_origin = "editor" if mine_dir or meta.get("pick", {}).get("auto", True) else "ai"
+    photos = {r["id"]: r for r in load(p["photos"], {"photos": []})["photos"]}
+    rows = []
+    for pid in dict.fromkeys(insta + tis):
+        rows.append({"id": pid, "original": src.get(pid, {}).get("from") or photos.get(pid, {}).get("src", ""),
+                     "category": "", "selected": True,
+                     "origin": insta_origin if pid in insta else "ai",
+                     "excluded": False,
+                     "blog_order": tis.index(pid) + 1 if pid in tis else None,
+                     "insta_order": insta.index(pid) + 1 if pid in insta else None,
+                     "insta_cover": bool(insta) and pid == insta[0],
+                     "shorts_order": insta.index(pid) + 1 if pid in insta else None,
+                     "blog_file": None, "insta_file": None,
+                     "reason": "티스토리 정보 사진" if pid not in insta else ""})
+    data = {"cover": insta[0] if insta else None, "blog": tis, "instagram": insta, "shorts": insta, "photos": rows}
+    save(p["usage"], data)
+    return data
+
+
 def build(work):
     p = work_paths(work)
+    if (p["work"] / "insta.json").exists():
+        return build_v2(work)
     photos = load(p["photos"], {"photos": []})
     sel = load(p["selection"])
     if not sel:
@@ -72,7 +104,7 @@ def write(work):
     lines = ["# 사진 사용표", "",
              f"- 원본 {len(data['photos'])}장 → 선택 {len(sel_rows)}장 · 블로그 {len(data['blog'])}장 · "
              f"인스타 {len(data['instagram'])}장 · 영상 {len(data['shorts'])}장 · 대표(표지) **{data['cover']}**",
-             "- 순서는 selection.json 목록 순서 그대로이며, 채널 결과물은 이 순서를 바꾸지 않는다 (점검 항목).",
+             "- 순서는 확정한 사진 순서 그대로이며, 채널 결과물은 이 순서를 바꾸지 않는다 (점검 항목).",
              "- 사진 파일은 `best_insta/`·`best_tistory/`에만 복사된다. 영상은 그 파일을 참조한다.", "",
              "| 사진 | 분류 | 고른 쪽 | 블로그 | 인스타 | 영상 | 이유 |", "| --- | --- | --- | --- | --- | --- | --- |"]
     for r in sel_rows:
@@ -81,7 +113,7 @@ def write(work):
         lines.append(f"| {r['id']} | {r['category'] or '—'} | {who} | {o(r['blog_order'])} | {ig} | {o(r['shorts_order'])} | {r['reason']} |")
     rest = [r["id"] for r in data["photos"] if not r["selected"]]
     lines += ["", f"선택 안 한 사진: {', '.join(rest) or '없음'}", "",
-              "원본 위치: " + (str(Path(data['photos'][0]['original']).parent) if data["photos"] else "—")]
+              "원본 위치: " + (str(Path(data['photos'][0]['original']).parent) if data["photos"] and data["photos"][0]["original"] else "—")]
     (p["work"] / "usage.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     return data
 

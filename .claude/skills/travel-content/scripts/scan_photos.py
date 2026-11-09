@@ -12,8 +12,9 @@ LAPLACE = ImageFilter.Kernel((3, 3), [0, 1, 0, 1, -4, 1, 0, 1, 0], scale=1, offs
 
 def taken_at(path):
     try:
-        exif = Image.open(path).getexif()
-        v = exif.get_ifd(0x8769).get(36867) or exif.get(306)
+        with Image.open(path) as im:
+            exif = im.getexif()
+            v = exif.get_ifd(0x8769).get(36867) or exif.get(306)
         return str(v) if v else ""
     except Exception:
         return ""
