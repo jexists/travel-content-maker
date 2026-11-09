@@ -4,15 +4,15 @@
 
 ## 순서
 1. `blog_plog.md` 1(공통)·2(여행)·3(작성 지시)대로 본문을 쓴다 → 아래 형식의 `intro`·`sections`·`outro`.
-2. `blog_plog.md` 4대로 제목 후보 10개(`title_candidates`)와 태그를 만들고, 그중 하나를 `title`로 고른다.
+2. `blog_plog.md` 4대로 제목 후보 **5개**(`title_candidates`, 추천을 1번에)와 태그를 만들고, 1번을 `title`로 둔다. 사용자가 확인 지점 C에서 다른 번호를 고르면 바꾼다.
 3. `blog_plog.md` 5(AI 리뷰)를 본문에 한 번 적용한다(맞춤법·반복 표현만, 내용 추가 금지).
-4. `tc.py build --ch tistory` → 점검 실패 항목을 고친다.
+4. `tc.py build --ch tistory` → 점검 실패는 묻지 말고 고쳐서 다시 build → 통과하면 확인 지점 C 카드(`review --stage blog`).
 
 ## 형식
 ```json
 "tistory": {
   "title": "강진 가우도 여행 코스 출렁다리 건너 섬 한 바퀴 후기",
-  "title_candidates": ["…10개…"],
+  "title_candidates": ["…5개, 1번이 추천…"],
   "intro": "도입: 여행을 가게 된 계기 / 첫인상 / 어떤 경험을 할 수 있는지. 메인 키워드 포함",
   "sections": [
     {"h2": "위치 및 방문 방법", "alt": "강진 가우도 출렁다리",

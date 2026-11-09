@@ -110,7 +110,11 @@ def cmd_build(a):
     passed, rows = check(ch, content, out_dir, best_dir, cfg)
     usage.write(a.work)
     state.built(a.work, ch, v, passed, str(out_dir.relative_to(p["work"].parent)))
-    out({"channel": ch, "version": f"v{v}", "passed": passed, "dir": str(out_dir),
+    confirmed = False
+    if getattr(a, "confirm", False) and passed:  # 확인 지점(A·B·C)에서 승인한 내용으로 만든 것 → 바로 에디터 컨펌
+        state.confirm(a.work, ch, True, "에디터", "확인 지점에서 승인한 내용으로 제작")
+        confirmed = True
+    out({"channel": ch, "version": f"v{v}", "passed": passed, "confirmed": confirmed, "dir": str(out_dir),
          "failed": [f"{i}: {d}" for i, ok, d in rows if not ok]})
 
 
@@ -236,11 +240,58 @@ def cmd_tistory_photos(a):
     out(insta.tistory_extra(a.work, _ids(a.extra)))
 
 
+def _channels(v):
+    chs = ["instagram", "youtube", "tistory"] if v == "all" else _ids(v)
+    bad = [c for c in chs if c not in ("instagram", "youtube", "tistory")]
+    if bad or not chs:
+        raise state.Refused(f"채널 이름 오류: {bad or v} (instagram, youtube, tistory, all)")
+    return chs
+
+
 def cmd_ceo(a):
+    """대표 승인·반려. --ch all 이나 instagram,youtube 처럼 여러 채널을 한 번에."""
     if a.reject and not a.reason:
         raise state.Refused("대표 반려에는 사유를 적어야 합니다.")
-    state.ceo(a.work, a.ch, not a.reject, "대표", a.reason or "")
-    out(state.get(a.work)["channels"][a.ch])
+    chs = _channels(a.ch)
+    st = state.get(a.work)
+    not_ready = [c for c in chs if st["channels"][c]["status"] != "confirmed"]
+    if not_ready:  # 하나라도 컨펌 전이면 아무것도 바꾸지 않는다
+        raise state.Refused("에디터 컨펌 전인 채널이 있어 대표 결정을 기록하지 않았습니다: "
+                            + ", ".join(f"{CHANNEL_KO[c]}({st['channels'][c]['status']})" for c in not_ready))
+    for c in chs:
+        state.ceo(a.work, c, not a.reject, "대표", a.reason or "")
+    st = state.get(a.work)
+    out({c: st["channels"][c]["status"] for c in chs})
+
+
+LINK_RULES = {"instagram": r"instagram\.com/(p|reel)/[\w-]+", "youtube": r"(youtube\.com/(shorts/|watch\?v=)|youtu\.be/)[\w-]{6,}",
+              "tistory": r"\.tistory\.com/(\d+|entry/[^/\s]+)"}
+
+
+def cmd_publish_all(a):
+    """게시 링크를 한 번에 기록. 준 채널만, 링크 형식이 틀리면 아무것도 기록하지 않는다."""
+    import re
+    links = {c: getattr(a, c) for c in ("instagram", "youtube", "tistory") if getattr(a, c)}
+    if not links:
+        raise state.Refused("링크가 없습니다 (--instagram / --youtube / --tistory).")
+    bad = [f"{CHANNEL_KO[c]}: {u}" for c, u in links.items() if not re.search(LINK_RULES[c], u)]
+    if bad:
+        raise state.Refused("게시물 링크가 아닙니다 (메인 주소가 아닌 게시물 주소를 주세요): " + " / ".join(bad))
+    st = state.get(a.work)
+    need = ("approved", "published") if st.get("flow") == 2 else ("confirmed", "published")
+    early = [CHANNEL_KO[c] for c in links if st["channels"][c]["status"] not in need]
+    if early:
+        raise state.Refused("대표 승인 전 채널이 있어 기록하지 않았습니다: " + ", ".join(early))
+    for c, u in links.items():
+        state.published(a.work, c, u, "에디터")
+        if c == "youtube":
+            p = work_paths(a.work)
+            cont = load(p["content"])
+            cont["youtube"]["url"] = u
+            save(p["content"], cont)
+    usage.write_outputs(a.work)
+    st = state.get(a.work)
+    out({c: {"status": st["channels"][c]["status"], "url": st["channels"][c]["url"]} for c in links})
 
 
 def cmd_review(a):
@@ -265,7 +316,7 @@ def main():
     sp("select", cmd_select)
     sp("plan", cmd_plan, (["--approve"], dict(action="store_true")), (["--reject"], dict(action="store_true")),
        (["--reason"], dict(default="")), BY)
-    sp("build", cmd_build, CH)
+    sp("build", cmd_build, CH, (["--confirm"], dict(action="store_true")))
     sp("confirm", cmd_confirm, CH, BY)
     sp("reject", cmd_reject, CH, (["--reason"], dict(required=True)), BY)
     sp("publish", cmd_publish, CH, (["--url"], dict(required=True)), BY)
@@ -277,9 +328,12 @@ def main():
        (["--title"], dict(required=True)))
     sp("insta-order", cmd_insta_order, (["--order"], dict(required=True)))
     sp("tistory-photos", cmd_tistory_photos, (["--extra"], dict(default="")))
-    sp("ceo", cmd_ceo, CH, (["--approve"], dict(action="store_true")), (["--reject"], dict(action="store_true")),
-       (["--reason"], dict(default="")))
-    sp("review", cmd_review, (["--stage"], dict(required=True, choices=["photos", "plan", "instagram", "youtube", "tistory"])))
+    sp("ceo", cmd_ceo, (["--ch"], dict(required=True)), (["--approve"], dict(action="store_true")),
+       (["--reject"], dict(action="store_true")), (["--reason"], dict(default="")))
+    sp("publish-all", cmd_publish_all, (["--instagram"], dict(default="")), (["--youtube"], dict(default="")),
+       (["--tistory"], dict(default="")))
+    sp("review", cmd_review, (["--stage"], dict(required=True, choices=[
+        "brief", "script", "blog", "final", "photos", "plan", "instagram", "youtube", "tistory"])))
     a = ap.parse_args()
     try:
         a.f(a)

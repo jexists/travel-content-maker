@@ -183,8 +183,9 @@ def order(work, nums):
     save(p["content"], c)
     sheet = sheets([(f"{i}", p["best_insta"] / r["file"], "표지" if i == 1 else r["id"]) for i, r in enumerate(new, 1)],
                    p["contact"], "insta_order", "인스타 올라가는 순서")
+    a_sheet = proposal_sheet(work)  # 확인 지점 A 시트(1번 = 표지 미리보기)도 갱신
     return {"order": [r["file"] for r in new], "dropped": [x for x in range(1, len(rows) + 1) if x not in nums],
-            "sheet": [str(s) for s in sheet]}
+            "sheet": [str(s) for s in sheet], "A_sheet": [str(s) for s in a_sheet]}
 
 
 def widths(work):
@@ -221,3 +222,15 @@ def tistory_extra(work, extra_ids):
     sheets([(f"{i}", out / n, n.split("_")[-1][:-4]) for i, n in enumerate(files, 1)], p["contact"], "selected_tistory",
            "티스토리 사진 (인스타 + 정보 사진)")
     return {"best_tistory": str(out.resolve()), "photos": files}
+
+
+def proposal_sheet(work):
+    """확인 지점 A용 시트 1장: 올라가는 순서대로 번호, 1번 칸은 표지 미리보기(글자 들어간 것)."""
+    p = work_paths(work)
+    files = sorted(p["best_insta"].glob("*.jpg"))
+    cover = p["work"] / "instagram" / "cover_preview.jpg"
+    items = []
+    for i, f in enumerate(files, 1):
+        src = cover if i == 1 and cover.exists() else f
+        items.append((f"{i}", src, "표지" if i == 1 else f.stem.split("_")[-1]))
+    return sheets(items, p["contact"], "A_insta", "인스타 제안 (올라가는 순서, 1번 = 표지)")

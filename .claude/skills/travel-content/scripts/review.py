@@ -33,6 +33,8 @@ def _check_summary(d):
 
 
 def card(work, stage):
+    if stage in POINTS:
+        return POINTS[stage](work)
     p = work_paths(work)
     st = load(p["state"])
     c = load(p["content"], {})
@@ -140,3 +142,112 @@ def card(work, stage):
     if v2 and stage == "plan":
         L = [f"## 기획안 승인 단계는 없습니다 — {st['id']}", "", "대표 승인은 각 채널 배포 직전에 받습니다 (`tc.py ceo`)."]
     return "\n".join(L)
+
+
+# ---------------------------------------------------------------- 확인 지점 A~E (질문을 줄인 흐름)
+
+ANS = "**답은 한 메시지로**"
+
+
+def _info_rows(c):
+    info = c.get("info", {})
+    unver = set(info.get("unverified", []))
+    labels = {"address": "위치", "hours": "운영 시간", "fee": "요금", "parking": "주차", "best_time": "추천 시기", "contact": "문의"}
+    return [f"| {labels.get(k, k)} | {v}{' ⚠️ 확인 필요' if k in unver else ''} |"
+            for k, v in info.items() if k in labels and v]
+
+
+def point_brief(work):
+    """A. 브리프 + 인스타 (사진·순서·표지·캡션·검색 정보·넣을 내용)를 한 번에."""
+    p = work_paths(work)
+    st, c = load(p["state"]), load(p["content"], {})
+    meta = load(p["work"] / "insta.json", {})
+    pk, ig, seo, br = meta.get("pick", {}), c.get("instagram", {}), c.get("seo", {}), c.get("brief", {})
+    n = len(list(p["best_insta"].glob("*.jpg"))) if p["best_insta"].exists() else 0
+    L = [f"## [A] 브리프 + 인스타 — {st['id']} {st['place']}", "",
+         f"- 사진: 원본 {pk.get('total', '—')}장 → {'전부' if pk.get('auto') else 'AI가 고른'} {n}장 · 폴더 `{(p['work'] / 'insta_pick').resolve()}`",
+         f"- 순서·표지: {_link('제안 시트 (1번 = 표지)', p['contact'] / 'A_insta_01.jpg')} · 표지 문구 `{' '.join('#' + r for r in c.get('region', []))}` / `{ig.get('cover_title', '')}`",
+         f"- 캡션: 「{(ig.get('caption') or '').splitlines()[0] if ig.get('caption') else '—'}」 외 · 해시태그 {len(ig.get('hashtags', []))}개", ""]
+    if ig.get("caption"):
+        L += ["```", ig["caption"], " ".join(ig.get("hashtags", [])), "```", ""]
+    L += [f"**검색한 정보** (출처 {len(c.get('info', {}).get('sources', []))}곳 · SEO `{seo.get('main', '')}`)", "", "| 항목 | 내용 |", "| --- | --- |"]
+    L += _info_rows(c) or ["| — | 없음 |"]
+    if br.get("questions"):
+        L += ["", "**넣을 내용 확인**"] + [f"- {q}" for q in br["questions"]]
+    L += ["", ANS + ": `이대로` · 고칠 것 자유롭게 (표지 번호·순서·문구·캡션·넣을 내용·빼고 싶은 사진) · `내가 고를게`(빈 폴더를 만들어 드려요)",
+          "승인하면 인스타 카드를 만들고, 이 브리프로 영상 대본(B)까지 준비해요."]
+    return "\n".join(L)
+
+
+def point_script(work):
+    """B. 영상 제목·대본 (제작 전)."""
+    p = work_paths(work)
+    st, c = load(p["state"]), load(p["content"], {})
+    yt = c.get("youtube", {})
+    sc = (yt.get("script") or {}).get("scenes", [])
+    chars = sum(len(s.get("narration", "")) for s in sc)
+    L = [f"## [B] 영상 제목·대본 — {st['id']} {st['place']} (제작 전)", "",
+         f"- 제목: {yt.get('title', '')}", f"- 화면 위 훅 문구: 「{(yt.get('script') or {}).get('hook_text', '')}」",
+         f"- 장면 {len(sc)}개 · 내레이션 {chars}자 (약 {chars / 6.5:.0f}초 예상, 기준 15~30초) · 목소리는 설정 기본값", "",
+         "| # | 사진 | 내레이션 |", "| --- | --- | --- |"]
+    L += [f"| {i} | {s.get('photo')} | {s.get('narration')} |" for i, s in enumerate(sc, 1)]
+    L += ["", ANS + ": `이대로` · 고칠 장면·문장·제목", "승인하면 영상을 만들고(점검 통과 시 컨펌 기록), 블로그 제목·내용(C)을 준비해요."]
+    return "\n".join(L)
+
+
+def point_blog(work):
+    """C. 블로그 제목 후보 5개 + 내용 (미리보기 포함)."""
+    import re as _re
+    from build_blog import layout
+    p = work_paths(work)
+    st, c = load(p["state"]), load(p["content"], {})
+    ts, main = c.get("tistory", {}), c.get("seo", {}).get("main", "")
+    cs = st["channels"]["tistory"]
+    d = p["work"] / "tistory" / f"v{cs['version']}"
+    body = " ".join(it[1] for it in layout(c) if it[0] == "text") + " " + ts.get("outro", "") if ts else ""
+    head, issues = _check_summary(d) if cs["version"] else ("아직 안 만듦", [])
+    L = [f"## [C] 블로그 제목·내용 — {st['id']} {st['place']}", "", "**제목 후보** (1번 추천)"]
+    L += [f"{i}. {t}{' ← 지금 제목' if t == ts.get('title') else ''}" for i, t in enumerate(ts.get("title_candidates", [])[:5], 1)]
+    L += ["", f"- 구성: 도입 → " + " → ".join(s["h2"] for s in ts.get("sections", [])) + " → 기본 정보 → 마무리",
+          f"- 본문 {len(body.strip())}자 · `{main}` {body.replace(' ', '').count(main.replace(' ', ''))}회 · 사진 {len(list((d / 'images').glob('*.jpg'))) if cs['version'] else 0}장 · {head}",
+          f"- 미리보기: {_link('preview.html', d / 'preview.html')} · {_link('article.md', d / 'article.md')}"]
+    if issues:
+        L += [f"- {x}" for x in issues if x.startswith("❌")]
+    L += ["", ANS + ": `N번 제목으로 이대로` · 고칠 문단·표현", "승인하면 컨펌을 기록하고 대표 최종 승인(D) 체크리스트를 보여 드려요."]
+    return "\n".join(L)
+
+
+def point_final(work):
+    """D·E. 세 채널 체크리스트 — 대표 승인을 한 번에, 링크를 한 번에."""
+    import usage
+    p = work_paths(work)
+    st = load(p["state"])
+    outs = {ch: (v, status, items) for ch, v, status, items in usage.outputs(work)}
+    mark = lambda ok: "✅" if ok else "☐"
+    L = [f"## [D·E] 최종 체크리스트 — {st['id']} {st['place']}", "",
+         "| 채널 | 버전 | 점검 | 에디터 컨펌 | 대표 승인 | 게시 링크 | 결과물 |", "| --- | --- | --- | --- | --- | --- | --- |"]
+    for ch in ("instagram", "youtube", "tistory"):
+        cs = st["channels"][ch]
+        v, status, items = outs[ch]
+        d = p["work"] / ch / f"v{cs['version']}"
+        head, _ = _check_summary(d) if cs["version"] else ("—", [])
+        main_file = {"instagram": d / "card_01.jpg", "youtube": d / "shorts.mp4", "tistory": d / "preview.html"}[ch]
+        files_ok = all(ok for _, _, ok in items) if items else False
+        L.append(f"| {CHANNEL_KO[ch]} | v{cs['version']} | {'✅' if '통과' in head else '❌'} | "
+                 f"{mark(cs['status'] in ('confirmed', 'approved', 'published'))} | {mark(cs['status'] in ('approved', 'published'))} | "
+                 f"{cs['url'] or '☐'} | {_link('열기', main_file)}{'' if files_ok else ' (파일 일부 없음)'} |")
+    sts = [st["channels"][c]["status"] for c in ("instagram", "youtube", "tistory")]
+    L.append("")
+    if any(s == "confirmed" for s in sts):
+        L += [ANS + " (대표 결정): `대표 승인 전부` · `인스타 승인, 유튜브 반려: 사유 …`",
+              "승인한 채널은 업로드 묶음을 안내해요. 공유·발행 버튼은 직접 눌러 주세요."]
+    elif all(s in ("approved", "published") for s in sts) and not all(s == "published" for s in sts):
+        L += [ANS + " (링크): 올린 뒤 게시물 링크를 한 번에 — `인스타 …, 유튜브 …, 티스토리 …` (메인 주소 말고 게시물 주소)"]
+    elif all(s == "published" for s in sts):
+        L += ["✅ 세 채널 게시 완료."]
+    else:
+        L += ["아직 에디터 컨펌 전인 채널이 있어요."]
+    return "\n".join(L)
+
+
+POINTS = {"brief": point_brief, "script": point_script, "blog": point_blog, "final": point_final}

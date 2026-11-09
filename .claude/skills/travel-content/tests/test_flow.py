@@ -114,6 +114,48 @@ class InstaFlow(Base):
             state.start_build(self.work, "instagram")
 
 
+class Points(Base):
+    """확인 지점 흐름: ceo 여러 채널, publish-all 링크 검사."""
+
+    def ready(self, chs, status="confirmed"):
+        st = state.get(self.work)
+        for c in chs:
+            st["channels"][c].update(version=1, status=status)
+        st["insta_photos"] = "fixed"
+        state.put(self.work, st)
+        (self.work / "content.json").write_text(json.dumps({"youtube": {}}, ensure_ascii=False))
+
+    def test_ceo_all_needs_every_channel_confirmed(self):
+        self.ready(["instagram", "youtube"])  # 티스토리는 아직
+        code, _, err = tc("ceo", "--work", self.work, "--ch", "all", "--approve")
+        self.assertEqual(code, 2)
+        self.assertIn("티스토리", err)
+        self.assertEqual(state.get(self.work)["channels"]["instagram"]["status"], "confirmed")  # 아무것도 안 바뀜
+        code, out, _ = tc("ceo", "--work", self.work, "--ch", "instagram,youtube", "--approve")
+        self.assertEqual(code, 0)
+        self.assertEqual(json.loads(out), {"instagram": "approved", "youtube": "approved"})
+
+    def test_publish_all_checks_links(self):
+        self.ready(["instagram", "youtube", "tistory"], "approved")
+        code, _, err = tc("publish-all", "--work", self.work, "--instagram", "https://www.instagram.com/")
+        self.assertEqual(code, 2)
+        self.assertIn("게시물 링크가 아닙니다", err)
+        code, out, _ = tc("publish-all", "--work", self.work, "--instagram", "https://www.instagram.com/p/ABC123/",
+                          "--youtube", "https://youtube.com/shorts/abcdefghijk")
+        self.assertEqual(code, 0)
+        st = state.get(self.work)["channels"]
+        self.assertEqual((st["instagram"]["status"], st["youtube"]["status"], st["tistory"]["status"]),
+                         ("published", "published", "approved"))
+        c = json.loads((self.work / "content.json").read_text())
+        self.assertEqual(c["youtube"]["url"], "https://youtube.com/shorts/abcdefghijk")
+
+    def test_publish_all_refuses_before_ceo(self):
+        self.ready(["tistory"], "confirmed")
+        code, _, err = tc("publish-all", "--work", self.work, "--tistory", "https://jexists.tistory.com/123")
+        self.assertEqual(code, 2)
+        self.assertIn("대표 승인 전", err)
+
+
 class Blog(unittest.TestCase):
     def content(self, blocks):
         return {"place": "가우도", "sponsored": False, "seo": {"main": "강진 가우도"}, "info": {},

@@ -137,7 +137,7 @@ def check(ch, content, out_dir, best_dir=None, cfg=None):
             add("메인 키워드 횟수 (본문)", r["main_keyword_min"] <= kc <= r["main_keyword_max"],
                 f"{kc}회 (기준 {r['main_keyword_min']}~{r['main_keyword_max']}회)")
         if ts.get("title_candidates") is not None:
-            add("제목 후보", len(ts["title_candidates"]) >= 10, f"{len(ts['title_candidates'])}개 (plog 기준 10개)")
+            add("제목 후보", len(ts["title_candidates"]) >= 5, f"{len(ts['title_candidates'])}개 (기준 5개, 사용자 확인용)")
         md_hits = [x for x in ("**", "##", "# ") if x in body_txt]
         add("본문 마크다운 기호 없음", not md_hits, "없음" if not md_hits else ", ".join(md_hits))
         add("SEO 메인 키워드 (제목)", main.replace(" ", "") in ts["title"].replace(" ", ""), main)
