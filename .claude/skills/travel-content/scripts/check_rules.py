@@ -105,6 +105,13 @@ def check(ch, content, out_dir, best_dir=None, cfg=None):
                 for name in ("voice.m4a", "subtitles.srt", "script.txt"):
                     f = Path(out_dir) / name
                     add(f"{name} 생성", f.exists() and f.stat().st_size > 0, "있음" if f.exists() else "없음")
+                if tl.get("hook_box"):
+                    hb = tl["hook_box"]
+                    first_sub = min((pg["box"][1] for s in tl["scenes"] for pg in s["pages"] if not s["contain"]), default=r["height"])
+                    add("훅 문구 위치", hb[0] >= side and hb[2] <= r["width"] - side and hb[3] < first_sub,
+                        f"「{tl['hook']}」 화면 위 고정, 자막과 안 겹침")
+                if tl.get("engine") != "openai":
+                    warn(f"TTS: {tl.get('voice')} — OpenAI 키가 없어 예비 엔진으로 만들었어요 (.env에 OPENAI_API_KEY)")
                 manual = ["TTS 발음·억양이 자연스러운지", "장면 전환이 어색하지 않은지", "자막과 말이 같은 순간에 바뀌는지 (문장 단위로 맞춤, 문장 안 페이지는 글자 수 비율)"]
                 for m in manual:
                     warn("수동 확인 필요: " + m)

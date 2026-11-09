@@ -122,10 +122,64 @@ def subtitle_png(lines, path, cfg, center_y):
 # ---------------------------------------------------------------- 오디오
 
 def say(text, out, cfg):
+    """macOS say (예비 엔진, OpenAI 키가 없을 때)."""
     subprocess.run(["say", "-v", cfg["voice"], "-r", str(cfg["rate"]), "-o", str(out),
                     "--data-format=LEI16@24000", text], check=True)
     with wave.open(str(out)) as w:
         return w.getnframes() / w.getframerate(), w.readframes(w.getnframes())
+
+
+def openai_key():
+    """환경변수 OPENAI_API_KEY, 없으면 프로젝트 루트 .env (git에 안 올라감). 키 값은 출력하지 않는다."""
+    import os
+    k = os.environ.get("OPENAI_API_KEY")
+    if k:
+        return k.strip()
+    for d in [Path.cwd(), *Path(__file__).resolve().parents]:
+        env = d / ".env"
+        if env.exists():
+            for line in env.read_text(encoding="utf-8").splitlines():
+                if line.strip().startswith("OPENAI_API_KEY="):
+                    return line.split("=", 1)[1].strip().strip('"').strip("'")
+    return None
+
+
+def openai_tts(text, cfg, cache_dir):
+    """OpenAI /v1/audio/speech → PCM 24kHz 16bit mono. 같은 문장·설정은 캐시해서 다시 과금하지 않는다."""
+    import hashlib
+    import urllib.error
+    import urllib.request
+    O = cfg["openai"]
+    body = {"model": O["model"], "voice": O["voice"], "input": text, "response_format": "pcm"}
+    if O.get("instructions"):
+        body["instructions"] = O["instructions"]
+    key = hashlib.sha256(json.dumps(body, ensure_ascii=False, sort_keys=True).encode()).hexdigest()[:24]
+    cache = Path(cache_dir) / f"{key}.pcm"
+    if cache.exists() and cache.stat().st_size:
+        data = cache.read_bytes()
+    else:
+        req = urllib.request.Request("https://api.openai.com/v1/audio/speech", data=json.dumps(body).encode(),
+                                     headers={"Authorization": f"Bearer {openai_key()}", "Content-Type": "application/json"})
+        try:
+            with urllib.request.urlopen(req, timeout=90) as r:
+                data = r.read()
+        except urllib.error.HTTPError as e:
+            raise SystemExit(f"OpenAI TTS 실패 ({e.code}): {e.read().decode(errors='ignore')[:300]}")
+        if len(data) < RATE // 10:
+            raise SystemExit("OpenAI TTS 응답이 비어 있습니다.")
+        cache.parent.mkdir(parents=True, exist_ok=True)
+        cache.write_bytes(data)
+    data = data[: len(data) // 2 * 2]
+    return len(data) / 2 / RATE, data
+
+
+def tts(text, out, cfg, cache_dir):
+    """설정 engine=openai 이고 키가 있으면 OpenAI, 아니면 say. (사용한 엔진, 길이, PCM)"""
+    if cfg.get("engine", "openai") == "openai" and openai_key():
+        dur, data = openai_tts(text, cfg, cache_dir)
+        return "openai", dur, data
+    dur, data = say(text, out, cfg)
+    return "say", dur, data
 
 
 def write_wav(path, pcm):
@@ -182,11 +236,39 @@ def ffmpeg(*args):
 
 # ---------------------------------------------------------------- 메인
 
-def make(scenes, out_dir, meta, cfg):
-    """scenes: [{"src": 사진 경로, "id": "P003"|"cover", "role", "narration", "subtitle"?, "contain"?}]"""
+def hook_png(text, path, cfg):
+    """화면 위쪽 훅 문구 (영상 내내 고정, 1~2줄). 반환: bbox"""
+    Hk = cfg["hook"]
+    size = Hk["size"]
+    while size > 48:
+        fnt = font_file(Hk["font"], size)
+        pages = wrap_pages(text, fnt, Hk["max_width"], 2)
+        if len(pages) == 1:
+            break
+        size -= 4
+    lines = pages[0]
+    im = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    lh = round(size * 1.25)
+    top = Hk["top"]
+    boxes = []
+    for i, line in enumerate(lines):
+        tw = d.textlength(line, font=fnt)
+        x, y = round((W - tw) / 2), top + i * lh
+        d.text((x, y), line, font=fnt, fill="white", stroke_width=Hk["stroke"], stroke_fill=(0, 0, 0, 240))
+        boxes.append(d.textbbox((x, y), line, font=fnt, stroke_width=Hk["stroke"]))
+    im.save(path)
+    return [min(b[0] for b in boxes), min(b[1] for b in boxes), max(b[2] for b in boxes), max(b[3] for b in boxes)]
+
+
+def make(scenes, out_dir, meta, cfg, hook_text=None, cache_dir=None):
+    """scenes: [{"src": 사진 경로, "id": "P003"|"cover", "role", "narration", "subtitle"?, "contain"?}]
+    hook_text: 화면 위쪽에 영상 내내 고정되는 훅 문구 (선택)."""
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     S = cfg
+    cache_dir = Path(cache_dir or out_dir.parent.parent / "_cache" / "tts")
+    engines = set()
     T, lead, tail = S["transition"], 0.15, S["transition"] + S["scene_pad"]
     sub_font = font_file(S["subtitle"]["font"], S["subtitle"]["size"])
     pause = bytes(int(RATE * S["sentence_pause"]) * 2)
@@ -204,7 +286,8 @@ def make(scenes, out_dir, meta, cfg):
             cur, pcm, pages = lead, bytearray(), []
             for j, (sent, sub) in enumerate(zip(sents, subs)):
                 spoken = tts_text(sent, S.get("pronounce"))
-                dur, data = say(spoken, tmp / f"s{i}_{j}.wav", S)
+                eng, dur, data = tts(spoken, tmp / f"s{i}_{j}.wav", S, cache_dir)
+                engines.add(eng)
                 pcm += data
                 ps = wrap_pages(sub, sub_font, S["subtitle"]["max_width"], S["subtitle"]["max_lines"])
                 chars = [max(1, sum(len(l.replace(" ", "")) for l in pg)) for pg in ps]
@@ -259,6 +342,13 @@ def make(scenes, out_dir, meta, cfg):
             nxt = f"[x{k}]"
             fc += f"{prev}[{k}:v]xfade=transition=fade:duration={T}:offset={off:.3f}{nxt};"
             prev = nxt
+        hook_box = None
+        if hook_text:  # 훅 문구는 영상 내내 위쪽에 고정
+            hp = tmp / "hook.png"
+            hook_box = hook_png(hook_text, hp, S)
+            args += ["-loop", "1", "-i", hp]
+            fc += f"{prev}[{len(segs)}:v]overlay=0:0:shortest=1[hk];"
+            prev = "[hk]"
         fc += f"{prev}fade=t=out:st={total - 0.5:.3f}:d=0.5,format=yuv420p[vout]"
         voice_wav = tmp / "voice.wav"
         pcm_all += bytes(max(0, round(total * RATE) * 2 - len(pcm_all)))
@@ -266,7 +356,8 @@ def make(scenes, out_dir, meta, cfg):
         ffmpeg("-i", voice_wav, "-af", "afade=t=out:st=%.3f:d=0.4" % (total - 0.4), "-c:a", "aac", "-b:a", "160k",
                out_dir / "voice.m4a")
         out = out_dir / "shorts.mp4"
-        ffmpeg(*args, "-i", out_dir / "voice.m4a", "-filter_complex", fc, "-map", "[vout]", "-map", f"{len(segs)}:a",
+        a_idx = len(segs) + (1 if hook_text else 0)
+        ffmpeg(*args, "-i", out_dir / "voice.m4a", "-filter_complex", fc, "-map", "[vout]", "-map", f"{a_idx}:a",
                "-c:v", "libx264", "-preset", "medium", "-crf", "19", "-r", FPS, "-c:a", "copy",
                "-t", f"{total:.3f}", "-movflags", "+faststart", out)
 
@@ -285,8 +376,15 @@ def make(scenes, out_dir, meta, cfg):
             if s["tts"] != s["text"]:
                 lines.append(f"  - TTS 발음: {s['tts']}")
         lines.append("")
+    engine = "openai" if engines == {"openai"} else ("say" if engines == {"say"} else "mixed")
+    voice = (f"OpenAI {cfg['openai']['model']} / {cfg['openai']['voice']}" if engine == "openai"
+             else f"macOS say / {cfg['voice']} (속도 {cfg['rate']})")
+    if hook_text:
+        lines.insert(1, f"훅 문구(화면 위 고정): {hook_text}")
+    lines.insert(1, f"목소리: {voice}")
     (out_dir / "script.txt").write_text("\n".join(lines), encoding="utf-8")
-    (out_dir / "timeline.json").write_text(json.dumps({"total": round(total, 3), "voice": cfg["voice"], "rate": cfg["rate"],
+    (out_dir / "timeline.json").write_text(json.dumps({"total": round(total, 3), "engine": engine, "voice": voice,
+                                                       "rate": cfg["rate"], "hook": hook_text, "hook_box": hook_box,
                                                        "scenes": timeline}, ensure_ascii=False, indent=2), encoding="utf-8")
     write_meta(out_dir, meta)
     return out

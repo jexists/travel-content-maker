@@ -22,9 +22,27 @@
       "header_bottom": 0.151,
       "footer_bottom": 0.037,
       "header_underline": true,
-      "header_shadow": {"radius": 0.15, "offset": [2, 2], "alpha": 170},
-      "footer_shadow": {"radius": 0.12, "offset": [3, 3], "alpha": 170},
-      "color": [255, 255, 255]
+      "header_shadow": {
+        "radius": 0.15,
+        "offset": [
+          2,
+          2
+        ],
+        "alpha": 170
+      },
+      "footer_shadow": {
+        "radius": 0.12,
+        "offset": [
+          3,
+          3
+        ],
+        "alpha": 170
+      },
+      "color": [
+        255,
+        255,
+        255
+      ]
     }
   },
   "shorts": {
@@ -35,14 +53,37 @@
     "voice": "Yuna",
     "rate": 200,
     "sentence_pause": 0.25,
-    "scene_pad": 0.35,
+    "scene_pad": 0.25,
     "end_hold": 0.8,
-    "transition": 0.4,
+    "transition": 0.3,
     "zoom": 0.06,
     "motion_seconds": 1.2,
     "subtitles_enabled": true,
-    "subtitle": {"font": "Pretendard-Bold.ttf", "size": 64, "max_width": 860, "max_lines": 2,
-                  "center_y": 1440, "stroke": 6, "safe_top": 1250, "safe_bottom": 1650, "safe_side": 90}
+    "subtitle": {
+      "font": "Pretendard-Bold.ttf",
+      "size": 64,
+      "max_width": 860,
+      "max_lines": 2,
+      "center_y": 1440,
+      "stroke": 6,
+      "safe_top": 1250,
+      "safe_bottom": 1650,
+      "safe_side": 90
+    },
+    "engine": "openai",
+    "openai": {
+      "_설명": "OpenAI TTS (/v1/audio/speech). 키는 환경변수 OPENAI_API_KEY 또는 프로젝트 .env (git 제외). 키가 없으면 macOS say로 만들고 check.md에 표시. gpt-4o-mini-tts는 2027-01-06 종료 예정(OpenAI 문서).",
+      "model": "gpt-4o-mini-tts",
+      "voice": "marin",
+      "instructions": "한국어 여행 릴스 내레이션. 20대 후반 친구가 '여기 진짜 좋았어' 하고 추천하듯 밝고 설레는 톤, 자연스러운 서울말. 문장 끝을 부드럽게 올리고, 광고 성우처럼 과장하지 말 것. 약간 빠른 템포, 문장 사이 짧은 숨."
+    },
+    "hook": {
+      "font": "Pretendard-Bold.ttf",
+      "size": 84,
+      "max_width": 940,
+      "top": 250,
+      "stroke": 7
+    }
   },
   "confirmation": {
     "show_preview": true,

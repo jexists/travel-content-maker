@@ -131,12 +131,13 @@ def _render(a, p, ch, content, st, out_dir, cfg):
         if script:
             scenes = []
             for sc in script["scenes"]:
-                if sc["photo"] == "cover":  # 컨펌된 인스타 표지 카드를 그대로 첫 장면에
-                    scenes.append({**sc, "id": "cover", "src": ig_dir / "card_01.jpg", "contain": True})
+                if sc["photo"] == "cover":  # 표지 사진을 화면 가득 (릴스는 첫 프레임이 가장 강해야 함)
+                    cov = sorted(p["best_insta"].glob("01_*.jpg"))
+                    scenes.append({**sc, "id": "cover", "src": cov[0] if cov else ig_dir / "card_01.jpg", "contain": not cov})
                 else:
                     scenes.append({**sc, "id": sc["photo"], "src": usage.shorts_file(a.work, sc["photo"])})
             sh = {**cfg["shorts"], "pronounce": {**cfg["shorts"].get("pronounce", {}), **script.get("pronounce", {})}}
-            make_shorts(scenes, out_dir, content["youtube"], sh)
+            make_shorts(scenes, out_dir, content["youtube"], sh, script.get("hook_text"), p["cache"] / "tts")
         else:
             make_slideshow(sorted(ig_dir.glob("card_*.jpg")), out_dir, content["youtube"])
     elif ch == "tistory":
