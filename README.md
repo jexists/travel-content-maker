@@ -14,6 +14,7 @@ AX Campus 4회차 개인 과제 · 제출 2026-11-10 23:59 · 발표 2026-11-11
   - `references/settings.json` 기본 설정 · `references/rules.json` 게시 규칙 · `references/prompts/` 채널별 작성 규칙
   - `scripts/tc.py` 명령 모음 (`init scan catalog select plan build confirm reject publish status review`)
 - 준비: `python3.12 -m venv .venv && .venv/bin/pip install -r .claude/skills/travel-content/scripts/requirements.txt`, `ffmpeg`, macOS `say`(한국어 Yuna)
+- 숏폼 OpenAI TTS: `cp .env.example .env` 후 `OPENAI_API_KEY` 입력 (`.env`는 git 제외, 비우면 `say`로 대신 만듦)
 - 작업 결과(`work/`)는 저장소에 올리지 않는다 (사진 복사본·영상 용량, `.gitignore`).
 - 폰트: Pretendard(OFL), 나눔손글씨 중학생·티몬 몬소리(instpic 저장소에서 복사 — 티몬 몬소리 라이선스 원문 확인 필요).
 
