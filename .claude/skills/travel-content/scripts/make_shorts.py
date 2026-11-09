@@ -173,13 +173,30 @@ def openai_tts(text, cfg, cache_dir):
     return len(data) / 2 / RATE, data
 
 
+def trim_silence(data, keep=0.06, thr=500):
+    """문장 앞뒤 무음을 잘라 장면이 늘어지지 않게 한다 (OpenAI 음성은 끝에 0.2~0.8초 무음이 붙음)."""
+    import array
+    a = array.array("h")
+    a.frombytes(data)
+    if not a:
+        return data
+    first = next((i for i, v in enumerate(a) if abs(v) > thr), 0)
+    last = len(a) - next((i for i, v in enumerate(reversed(a)) if abs(v) > thr), 0)
+    pad = int(RATE * keep)
+    a = a[max(0, first - pad):min(len(a), last + pad)]
+    return a.tobytes()
+
+
 def tts(text, out, cfg, cache_dir):
     """설정 engine=openai 이고 키가 있으면 OpenAI, 아니면 say. (사용한 엔진, 길이, PCM)"""
     if cfg.get("engine", "openai") == "openai" and openai_key():
-        dur, data = openai_tts(text, cfg, cache_dir)
-        return "openai", dur, data
-    dur, data = say(text, out, cfg)
-    return "say", dur, data
+        _, data = openai_tts(text, cfg, cache_dir)
+        eng = "openai"
+    else:
+        _, data = say(text, out, cfg)
+        eng = "say"
+    data = trim_silence(data)
+    return eng, len(data) / 2 / RATE, data
 
 
 def write_wav(path, pcm):
