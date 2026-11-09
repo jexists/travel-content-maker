@@ -124,7 +124,22 @@ def check(ch, content, out_dir, best_dir=None, cfg=None):
         html = (Path(out_dir) / "post.html").read_text(encoding="utf-8") if (Path(out_dir) / "post.html").exists() else ""
         body = re.sub(r"<[^>]+>", " ", html)
         imgs = re.findall(r"<img [^>]*>", html)
-        add("제목 길이", len(ts["title"]) <= r["title_max"], f"{len(ts['title'])}자 / {r['title_max']}자")
+        tmin = r.get("title_min", 0)
+        add("제목 길이", tmin <= len(ts["title"]) <= r["title_max"], f"{len(ts['title'])}자 (기준 {tmin}~{r['title_max']}자)")
+        add("제목이 메인 키워드로 시작", ts["title"].replace(" ", "").startswith(main.replace(" ", "")), main)
+        from build_blog import layout as _lay
+        body_txt = " ".join(it[1] for it in _lay(content) if it[0] == "text") + " " + ts.get("outro", "")
+        if r.get("body_min_chars"):
+            n_chars = len(body_txt.strip())
+            add("본문 분량", n_chars >= r["body_min_chars"], f"{n_chars}자 (최소 {r['body_min_chars']}자)")
+        if r.get("main_keyword_min"):
+            kc = body_txt.replace(" ", "").count(main.replace(" ", ""))
+            add("메인 키워드 횟수 (본문)", r["main_keyword_min"] <= kc <= r["main_keyword_max"],
+                f"{kc}회 (기준 {r['main_keyword_min']}~{r['main_keyword_max']}회)")
+        if ts.get("title_candidates") is not None:
+            add("제목 후보", len(ts["title_candidates"]) >= 10, f"{len(ts['title_candidates'])}개 (plog 기준 10개)")
+        md_hits = [x for x in ("**", "##", "# ") if x in body_txt]
+        add("본문 마크다운 기호 없음", not md_hits, "없음" if not md_hits else ", ".join(md_hits))
         add("SEO 메인 키워드 (제목)", main.replace(" ", "") in ts["title"].replace(" ", ""), main)
         first = ts["intro"]
         add("SEO 메인 키워드 (첫 문단)", main.replace(" ", "") in first.replace(" ", ""), first[:40] + "…")

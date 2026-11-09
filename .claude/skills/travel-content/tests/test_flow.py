@@ -140,6 +140,8 @@ class Blog(unittest.TestCase):
         self.assertTrue(r["사진 순서 유지"][0])
         self.assertTrue(r["선택 사진 모두 사용"][0])
         self.assertLess(html.index("<p>a</p>"), html.index("images/01.jpg"))
+        self.assertFalse(r["본문 분량"][0])  # plog 기준 1500자 미만
+        self.assertFalse(r["메인 키워드 횟수 (본문)"][0])
 
     def test_order_and_runs_fail(self):
         b = [{"text": "a"}, {"photo": "02_P002.jpg"}, {"photo": "01_P001.jpg"}, {"photo": "03_P003.jpg"}]

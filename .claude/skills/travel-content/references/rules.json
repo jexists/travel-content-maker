@@ -1,27 +1,42 @@
 {
   "_설명": "게시 규칙. 팀 규칙은 값을 바꿔 조정한다. '(플랫폼 제한)' 표시는 플랫폼이 정한 한도.",
   "common": {
-    "banned_words": ["최고", "1등", "무조건", "100%", "역대급"],
+    "banned_words": [
+      "최고",
+      "1등",
+      "무조건",
+      "100%",
+      "역대급"
+    ],
     "sponsor_notice": "이 콘텐츠는 업체로부터 제품·서비스를 제공받아 작성한 협찬 콘텐츠입니다.",
     "sponsor_label": "협찬"
   },
   "instagram": {
-    "cards_min": 1, "cards_max": 20,
+    "cards_min": 1,
+    "cards_max": 20,
     "cover_tags": 2,
     "caption_max": 2200,
-    "hashtags_min": 5, "hashtags_max": 15,
+    "hashtags_min": 5,
+    "hashtags_max": 15,
     "hashtags_platform_max": 30
   },
   "youtube": {
     "title_max": 100,
-    "duration_min": 15, "duration_max": 30,
-    "width": 1080, "height": 1920,
+    "duration_min": 15,
+    "duration_max": 30,
+    "width": 1080,
+    "height": 1920,
     "tags_min": 5
   },
   "tistory": {
     "photos_min": 5,
     "h2_min": 3,
-    "tags_min": 5, "tags_max": 10,
-    "title_max": 40
+    "tags_min": 5,
+    "tags_max": 10,
+    "title_max": 35,
+    "title_min": 25,
+    "body_min_chars": 1500,
+    "main_keyword_min": 5,
+    "main_keyword_max": 7
   }
 }

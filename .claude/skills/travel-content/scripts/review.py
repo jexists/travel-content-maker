@@ -118,7 +118,7 @@ def card(work, stage):
         else:
             ts = c["tistory"]
             L += ["**지금 하는 일**: 티스토리 글(글·사진 교차 배치)을 확인합니다.", "",
-                  f"- 제목: 「{ts['title']}」",
+                  f"- 제목: 「{ts['title']}」" + (f" (후보 {len(ts['title_candidates'])}개 중 선택)" if ts.get("title_candidates") else ""),
                   f"- 첫 문단: 「{ts['intro'][:70]}…」",
                   f"- 구성: 도입 → " + " → ".join(s["h2"] for s in ts["sections"]) + " → 기본 정보 → 마무리",
                   f"- 사진 {len(list((d / 'images').glob('*.jpg')))}장 · 대표 이미지 {(d / 'cover.txt').read_text(encoding='utf-8').strip() if (d / 'cover.txt').exists() else '—'}",
