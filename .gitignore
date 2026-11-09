@@ -1,0 +1,9 @@
+# 작업 결과(사진 복사본·카드·영상·대장)는 올리지 않는다
+work/
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+client_secret*.json
+*.token
+.env

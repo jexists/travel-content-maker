@@ -1,0 +1,322 @@
+"""유튜브 숏폼 1080×1920 MP4.
+
+새 방식 (content.youtube.script 가 있을 때):
+  대본 장면마다 사진 1장 + 내레이션. 문장 단위 TTS(macOS say) → 실제 길이로 장면 길이를 정하고,
+  자막은 Pillow로 PNG를 그려 overlay 한다 (이 ffmpeg에는 drawtext/subtitles 필터가 없음).
+  장면 움직임은 1.2초 동안만 부드럽게 줌·팬하고 멈춘다 (blog2shorts 방식), 장면 사이 xfade.
+  결과: shorts.mp4, voice.m4a, subtitles.srt, script.txt, meta.txt, timeline.json
+
+옛 방식 (script 가 없을 때): 컨펌된 인스타 카드를 장당 2.5초씩 이어 붙인다 (make_slideshow).
+"""
+import json
+import re
+import subprocess
+import tempfile
+import wave
+from pathlib import Path
+
+from PIL import Image, ImageDraw, ImageFilter, ImageOps
+
+from common import font_file, open_rgb
+
+W, H, FPS = 1080, 1920, 30
+RATE = 24000  # TTS 샘플레이트 (16bit mono)
+
+
+# ---------------------------------------------------------------- 텍스트
+
+NATIVE = {1: "한", 2: "두", 3: "세", 4: "네", 5: "다섯", 6: "여섯", 7: "일곱", 8: "여덟", 9: "아홉", 10: "열",
+          11: "열한", 12: "열두", 20: "스무"}
+NATIVE_COUNTERS = "시간|개|명|곳|번|장|살|군데|가지"
+UNITS = [("km", "킬로미터"), ("cm", "센티미터"), ("kg", "킬로그램"), ("m", "미터"), ("%", "퍼센트")]
+DIGITS = "영일이삼사오육칠팔구"
+
+
+def split_sentences(text):
+    """문장 끝(. ? ! …)에서 나눈다. 숫자 안의 점(2.5)은 나누지 않는다."""
+    parts = re.split(r"(?<=[.?!…])(?!\d)\s+", text.strip())
+    return [p.strip() for p in parts if p.strip()]
+
+
+def tts_text(text, pronounce=None):
+    """발음용 텍스트. 자막에는 쓰지 않는다 (자막은 원문)."""
+    t = text
+    for k, v in (pronounce or {}).items():
+        t = t.replace(k, v)
+    t = re.sub(r"\(([一-鿿]+)\)", "", t)            # 함께해(海)길 → 함께해길
+    t = re.sub(r"(\d)\s*~\s*(\d)", r"\1에서 \2", t)          # 1~2 → 1에서 2
+    for u, ko in UNITS:  # 단위를 먼저 (2.5km → 2.5 킬로미터)
+        t = re.sub(rf"(\d)\s*{re.escape(u)}(?![A-Za-z])", rf"\1 {ko}", t)
+    t = re.sub(r"(\d+)\.(\d+)", lambda m: f"{m.group(1)}점{''.join(DIGITS[int(c)] for c in m.group(2))}", t)  # 2.5 → 2점오
+    t = re.sub(rf"\b(\d{{1,2}})\s*({NATIVE_COUNTERS})",
+               lambda m: f"{NATIVE.get(int(m.group(1)), m.group(1))} {m.group(2)}" if int(m.group(1)) in NATIVE else m.group(0), t)
+    t = t.replace("·", ", ").replace("/", ", ")
+    return re.sub(r"\s+", " ", t).strip()
+
+
+def _balanced_two(text, fnt, max_w, d):
+    """두 줄에 들어가면 줄 길이가 비슷하고 쉼표 뒤에서 끊기는 지점을 고른다 ('강진 / 가우도예요' 같은 끊김 방지)."""
+    words = text.split()
+    best = None
+    for k in range(1, len(words)):
+        l1, l2 = " ".join(words[:k]), " ".join(words[k:])
+        w1, w2 = d.textlength(l1, font=fnt), d.textlength(l2, font=fnt)
+        if w1 > max_w or w2 > max_w:
+            continue
+        cost = abs(w1 - w2) - (max_w * 0.5 if l1.endswith(",") else 0) + (max_w if len(l2.replace(" ", "")) <= 3 else 0)
+        if best is None or cost < best[0]:
+            best = (cost, [l1, l2])
+    return best[1] if best else None
+
+
+def wrap_pages(text, fnt, max_w, max_lines=2):
+    """자막 페이지: 띄어쓰기 단위로 max_w 픽셀 안에 줄을 채우고, max_lines 줄씩 한 페이지."""
+    d = ImageDraw.Draw(Image.new("L", (1, 1)))
+    if d.textlength(text, font=fnt) <= max_w:
+        return [[text]]
+    if max_lines >= 2:
+        two = _balanced_two(text, fnt, max_w, d)
+        if two:
+            return [two]
+    lines, cur = [], ""
+    for word in text.split():
+        cand = f"{cur} {word}".strip()
+        if d.textlength(cand, font=fnt) <= max_w:
+            cur = cand
+        else:
+            if cur:
+                lines.append(cur)
+            cur = word
+            while d.textlength(cur, font=fnt) > max_w:  # 띄어쓰기 없는 긴 단어
+                cut = len(cur) - 1
+                while cut > 1 and d.textlength(cur[:cut], font=fnt) > max_w:
+                    cut -= 1
+                lines.append(cur[:cut])
+                cur = cur[cut:]
+    if cur:
+        lines.append(cur)
+    # 마지막 줄이 너무 짧으면(2글자 이하) 앞 줄과 균형을 맞춘다
+    pages = [lines[i:i + max_lines] for i in range(0, len(lines), max_lines)]
+    if len(pages) > 1 and len(pages[-1]) == 1 and len(pages[-1][0]) <= 3 and len(pages[-2]) == max_lines:
+        pages[-1].insert(0, pages[-2].pop())
+    return pages
+
+
+def subtitle_png(lines, path, cfg, center_y):
+    S = cfg["subtitle"]
+    fnt = font_file(S["font"], S["size"])
+    im = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    lh = round(S["size"] * 1.32)
+    top = round(center_y - lh * len(lines) / 2)
+    boxes = []
+    for i, line in enumerate(lines):
+        tw = d.textlength(line, font=fnt)
+        x, y = round((W - tw) / 2), top + i * lh
+        d.text((x, y), line, font=fnt, fill="white", stroke_width=S["stroke"], stroke_fill=(0, 0, 0, 235))
+        boxes.append(d.textbbox((x, y), line, font=fnt, stroke_width=S["stroke"]))
+    im.save(path)
+    return [min(b[0] for b in boxes), min(b[1] for b in boxes), max(b[2] for b in boxes), max(b[3] for b in boxes)]
+
+
+# ---------------------------------------------------------------- 오디오
+
+def say(text, out, cfg):
+    subprocess.run(["say", "-v", cfg["voice"], "-r", str(cfg["rate"]), "-o", str(out),
+                    "--data-format=LEI16@24000", text], check=True)
+    with wave.open(str(out)) as w:
+        return w.getnframes() / w.getframerate(), w.readframes(w.getnframes())
+
+
+def write_wav(path, pcm):
+    with wave.open(str(path), "wb") as w:
+        w.setnchannels(1)
+        w.setsampwidth(2)
+        w.setframerate(RATE)
+        w.writeframes(pcm)
+
+
+# ---------------------------------------------------------------- 화면
+
+def frame_image(src, out, contain=False):
+    """2배 해상도(2160×3840) 바탕 이미지. 사진은 비율 유지로 꽉 채우고(늘이지 않음),
+    contain=True(표지 카드)면 글자가 잘리지 않게 전부 보이게 놓고 뒤를 흐린 사진으로 채운다."""
+    im = open_rgb(src)
+    big = (W * 2, H * 2)
+    bg = ImageOps.fit(im, big, method=Image.LANCZOS)
+    if contain:
+        bg = bg.filter(ImageFilter.GaussianBlur(40)).point(lambda v: int(v * 0.6))
+        fg = im.copy()
+        fg.thumbnail(big, Image.LANCZOS)
+        if fg.width < big[0]:
+            fg = fg.resize((big[0], round(fg.height * big[0] / fg.width)), Image.LANCZOS)
+        bg.paste(fg, ((big[0] - fg.width) // 2, (big[1] - fg.height) // 2))
+    bg.save(out, quality=92)
+    return out
+
+
+MOTIONS = ["zoom_in", "pan_right", "zoom_out", "pan_left"]
+
+
+def zoompan(motion, frames, cfg):
+    k = max(1, round(cfg["motion_seconds"] * FPS))
+    z = cfg["zoom"]
+    p = f"min(on/{k},1)"
+    s = f"({p}*{p}*(3-2*{p}))"  # smoothstep: 처음 1.2초만 움직이고 멈춤
+    if motion == "zoom_in":
+        zz, xx = f"1+{z}*{s}", "iw/2-(iw/zoom/2)"
+    elif motion == "zoom_out":
+        zz, xx = f"{1 + z}-{z}*{s}", "iw/2-(iw/zoom/2)"
+    elif motion == "pan_right":
+        zz, xx = f"{1 + z}", f"(iw-iw/zoom)*(0.35+0.3*{s})"
+    else:
+        zz, xx = f"{1 + z}", f"(iw-iw/zoom)*(0.65-0.3*{s})"
+    return f"zoompan=z='{zz}':x='{xx}':y='ih/2-(ih/zoom/2)':d={frames}:s={W}x{H}:fps={FPS}"
+
+
+def ffmpeg(*args):
+    r = subprocess.run(["ffmpeg", "-y", "-loglevel", "error", *map(str, args)], capture_output=True, text=True)
+    if r.returncode:
+        raise SystemExit(f"ffmpeg 실패: {r.stderr.strip()[:600]}")
+
+
+# ---------------------------------------------------------------- 메인
+
+def make(scenes, out_dir, meta, cfg):
+    """scenes: [{"src": 사진 경로, "id": "P003"|"cover", "role", "narration", "subtitle"?, "contain"?}]"""
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    S = cfg
+    T, lead, tail = S["transition"], 0.15, S["transition"] + S["scene_pad"]
+    sub_font = font_file(S["subtitle"]["font"], S["subtitle"]["size"])
+    pause = bytes(int(RATE * S["sentence_pause"]) * 2)
+    timeline, pcm_all, srt, script = [], bytearray(), [], []
+    t0 = 0.0  # 이 장면이 영상에서 시작하는 시각
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp)
+        segs = []
+        for i, sc in enumerate(scenes):
+            last = i == len(scenes) - 1
+            sents = split_sentences(sc["narration"])
+            subs = split_sentences(sc.get("subtitle") or sc["narration"])
+            if len(subs) != len(sents):  # 자막 문장을 따로 쓴 경우 문장 수가 같아야 타이밍을 맞출 수 있다
+                raise SystemExit(f"장면 {i + 1}: narration과 subtitle의 문장 수가 다릅니다 ({len(sents)} ≠ {len(subs)})")
+            cur, pcm, pages = lead, bytearray(), []
+            for j, (sent, sub) in enumerate(zip(sents, subs)):
+                spoken = tts_text(sent, S.get("pronounce"))
+                dur, data = say(spoken, tmp / f"s{i}_{j}.wav", S)
+                pcm += data
+                ps = wrap_pages(sub, sub_font, S["subtitle"]["max_width"], S["subtitle"]["max_lines"])
+                chars = [max(1, sum(len(l.replace(" ", "")) for l in pg)) for pg in ps]
+                a = cur
+                for pg, c in zip(ps, chars):
+                    b = a + dur * c / sum(chars)
+                    pages.append({"lines": pg, "start": round(a, 3), "end": round(b, 3)})
+                    a = b
+                script.append({"scene": i + 1, "id": sc["id"], "role": sc.get("role", "body"), "text": sent,
+                               "subtitle": sub, "tts": spoken, "sec": round(dur, 2)})
+                cur += dur
+                if j < len(sents) - 1:
+                    pcm += pause
+                    cur += S["sentence_pause"]
+            speech_end = cur
+            dur_scene = speech_end + (S["end_hold"] + 0.4 if last else tail)
+            frames = round(dur_scene * FPS)
+            dur_scene = frames / FPS
+            # 장면 소리를 전체 트랙의 시작 시각(t0 + lead)에 놓는다
+            start_sample = round((t0 + lead) * RATE) * 2
+            if len(pcm_all) < start_sample:
+                pcm_all += bytes(start_sample - len(pcm_all))
+            pcm_all[start_sample:start_sample + len(pcm)] = pcm
+            # 자막 PNG: 표지(contain) 장면은 카드 글씨를 가리지 않게 위쪽에
+            cy = 330 if sc.get("contain") else S["subtitle"]["center_y"]
+            inputs, chain = ["-i", frame_image(sc["src"], tmp / f"bg{i}.jpg", sc.get("contain"))], ""
+            label = "[v0]"
+            chain = f"[0]{zoompan(MOTIONS[i % len(MOTIONS)], frames, S)},format=yuv420p{label}"
+            for k, pg in enumerate(pages):
+                png = tmp / f"sub{i}_{k}.png"
+                pg["box"] = subtitle_png(pg["lines"], png, S, cy)
+                inputs += ["-i", png]
+                nxt = f"[v{k + 1}]"
+                chain += f";{label}[{k + 1}]overlay=0:0:enable='between(t,{pg['start']},{pg['end']})'{nxt}"
+                label = nxt
+                srt.append((t0 + pg["start"], t0 + pg["end"], "\n".join(pg["lines"])))
+            seg = tmp / f"seg{i}.mp4"
+            ffmpeg(*inputs, "-filter_complex", chain, "-map", label, "-frames:v", frames, "-r", FPS,
+                   "-c:v", "libx264", "-preset", "veryfast", "-crf", "19", "-pix_fmt", "yuv420p", seg)
+            segs.append((seg, dur_scene))
+            timeline.append({"scene": i + 1, "id": sc["id"], "role": sc.get("role", "body"), "start": round(t0, 3),
+                             "duration": round(dur_scene, 3), "speech_end": round(t0 + speech_end, 3),
+                             "motion": MOTIONS[i % len(MOTIONS)], "contain": bool(sc.get("contain")), "pages": pages})
+            t0 += dur_scene - (0 if last else T)
+        total = t0
+        # 영상: xfade로 이어 붙이고 끝을 페이드아웃
+        args, fc, prev, off = [], "", "[0:v]", 0.0
+        for k, (seg, d) in enumerate(segs):
+            args += ["-i", seg]
+        for k in range(1, len(segs)):
+            off += segs[k - 1][1] - T
+            nxt = f"[x{k}]"
+            fc += f"{prev}[{k}:v]xfade=transition=fade:duration={T}:offset={off:.3f}{nxt};"
+            prev = nxt
+        fc += f"{prev}fade=t=out:st={total - 0.5:.3f}:d=0.5,format=yuv420p[vout]"
+        voice_wav = tmp / "voice.wav"
+        pcm_all += bytes(max(0, round(total * RATE) * 2 - len(pcm_all)))
+        write_wav(voice_wav, bytes(pcm_all[:round(total * RATE) * 2]))
+        ffmpeg("-i", voice_wav, "-af", "afade=t=out:st=%.3f:d=0.4" % (total - 0.4), "-c:a", "aac", "-b:a", "160k",
+               out_dir / "voice.m4a")
+        out = out_dir / "shorts.mp4"
+        ffmpeg(*args, "-i", out_dir / "voice.m4a", "-filter_complex", fc, "-map", "[vout]", "-map", f"{len(segs)}:a",
+               "-c:v", "libx264", "-preset", "medium", "-crf", "19", "-r", FPS, "-c:a", "copy",
+               "-t", f"{total:.3f}", "-movflags", "+faststart", out)
+
+    def ts(x):
+        ms = round(x * 1000)
+        return f"{ms // 3600000:02d}:{ms // 60000 % 60:02d}:{ms // 1000 % 60:02d},{ms % 1000:03d}"
+    (out_dir / "subtitles.srt").write_text(
+        "\n".join(f"{n}\n{ts(a)} --> {ts(b)}\n{t}\n" for n, (a, b, t) in enumerate(srt, 1)), encoding="utf-8")
+    lines = [f"# 숏폼 대본 — 총 {total:.1f}초", ""]
+    for sc_t in timeline:
+        lines.append(f"## 장면 {sc_t['scene']} · {sc_t['role']} · 사진 {sc_t['id']} · {sc_t['start']:.1f}~{sc_t['start'] + sc_t['duration']:.1f}초 · {sc_t['motion']}")
+        for s in [x for x in script if x["scene"] == sc_t["scene"]]:
+            lines.append(f"- 내레이션: {s['text']}")
+            if s["subtitle"] != s["text"]:
+                lines.append(f"  - 자막: {s['subtitle']}")
+            if s["tts"] != s["text"]:
+                lines.append(f"  - TTS 발음: {s['tts']}")
+        lines.append("")
+    (out_dir / "script.txt").write_text("\n".join(lines), encoding="utf-8")
+    (out_dir / "timeline.json").write_text(json.dumps({"total": round(total, 3), "voice": cfg["voice"], "rate": cfg["rate"],
+                                                       "scenes": timeline}, ensure_ascii=False, indent=2), encoding="utf-8")
+    write_meta(out_dir, meta)
+    return out
+
+
+def write_meta(out_dir, meta):
+    (Path(out_dir) / "meta.txt").write_text(
+        f"제목: {meta['title']}\n\n설명:\n{meta['description']}\n\n태그: {', '.join(meta['tags'])}\n", encoding="utf-8")
+
+
+def make_slideshow(card_files, out_dir, meta, sec=2.5, fade=0.3):
+    """옛 방식: 인스타 카드를 장당 2.5초씩 (대본이 없을 때만)."""
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp)
+        segs = []
+        for i, card in enumerate(card_files):
+            seg = tmp / f"seg_{i:02d}.mp4"
+            vf = (f"[0]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,"
+                  f"boxblur=30:5,eq=brightness=-0.1[bg];"
+                  f"[0]scale=1080:-2[fg];[bg][fg]overlay=(W-w)/2:(H-h)/2,"
+                  f"fade=t=in:st=0:d={fade},fade=t=out:st={sec - fade}:d={fade},format=yuv420p")
+            ffmpeg("-loop", "1", "-t", sec, "-i", card, "-filter_complex", vf, "-r", "30", "-c:v", "libx264",
+                   "-preset", "veryfast", "-crf", "20", seg)
+            segs.append(seg)
+        lst = tmp / "list.txt"
+        lst.write_text("".join(f"file '{s}'\n" for s in segs))
+        out = out_dir / "shorts.mp4"
+        ffmpeg("-f", "concat", "-safe", "0", "-i", lst, "-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo", "-shortest",
+               "-c:v", "copy", "-c:a", "aac", "-movflags", "+faststart", out)
+    write_meta(out_dir, meta)
+    return out
