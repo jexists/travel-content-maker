@@ -1,4 +1,4 @@
-# HANDOFF — 여행 콘텐츠 3채널 자동화 (AX Campus 4회차 개인 과제)
+# HANDOFF — 여행 콘텐츠 제작 자동화 (AX Campus 4회차 개인 과제)
 
 > 갱신 2026-11-10 · **마감 2026-11-10(화) 23:59 제출 · 2026-11-11(수) 발표·시연**
 > 저장소: github.com/jexists/travel-content-maker (비공개, main)
@@ -14,7 +14,8 @@
 - 업로드: Claude in Chrome으로 입력까지, 공유·발행은 사용자. 이번 세션에서는 Chrome 확장이 연결되지 않아 사용자가 직접 올리기로 함.
 - 확장 계획(발표 마지막 장): 1단계 tripfolio(AI 코딩 기반 시스템) → 2단계 식당·물건 리뷰 등 다른 주제 → 3단계 생성형 이미지로 컨셉까지 자동 인플루언서(2·3단계 이름 새로). 한계: 사진 선택·대본·블로그 아직 어색, 토큰·시간 절약, 잘 쓴 내용 검증 기준.
 
-- 배포(2026-11-10 추가): 스킬 zip(`dist/travel-content-skill.zip`)을 받아 skills 폴더에 넣는 3단계, Mac·Windows 공통. 첫 실행 때 `scripts/setup.py`가 패키지·ffmpeg(static-ffmpeg)·음성을 준비하고, 오류는 Claude가 SKILL.md "준비 문제 해결" 표대로 처리. Windows 실제 실행은 미검증.
+- 업무명: **여행 콘텐츠 제작 자동화** (2026-11-10 확정, 사용자). 발표 PDF·HTML 안 제목은 이전 이름 "여행 콘텐츠 3채널 자동화"로 둠(사용자: PDF·HTML은 안 바꿔도 됨).
+- 배포(2026-11-10 추가): 스킬 zip(`dist/travel-content-skill.zip`)을 받아 skills 폴더에 넣는 4단계(① 앱 ② 스킬 ③ 목소리 키 `.env` ④ 쓰기), Mac·Windows 공통. 첫 실행 때 `scripts/setup.py`가 패키지·ffmpeg(static-ffmpeg)·음성을 준비하고, 오류는 Claude가 SKILL.md "준비 문제 해결" 표대로 처리. Windows 실제 실행은 미검증.
 - v5(2026-11-10): 마지막에 감사합니다 표지(목차 제외). 공용 dev-ppt-maker template.html이 12:08에 바뀌어 v5 HTML은 바뀌기 전 결과에 표지만 끼워 넣음 — build.py로 다시 만들면 새 템플릿 모양이 됨. 실행 방법 4단계(① 앱 ② 스킬 ③ 목소리 키 `.env` ④ 쓰기), 스킬 zip에 `.env.example` 포함(스킬 폴더 `.env`로 OpenAI TTS 확인), 효과·한계는 사용자 문장대로, 마지막 장은 확장 3단계만.
 - v4(2026-11-10): 흐름도 그림만(테두리·빈칸 없음), 표 초록 강조 줄 제거, 구성도 가로판(`architecture_v3`), Python은 첫 실행 때 Claude가 설치(winget·brew·uv, SKILL.md 준비 문제 해결), 첫 실행 장 터미널 모양, 효과·한계 카드.
 - 문서·발표는 `_v2`로 새로 만듦(이전 PDF·HTML 보존). 최신은 `_v3`: 목차 3열, 업무 소개 카드, 근거 열 삭제, 개선 설계 비교 행·5칸 흐름, 구성도 크게, "과제 완료" 카드, 실행 방법은 실제 캡처(claude.ai/download·python.org) + 예시 그림(`docs/presentation/illust/`).
@@ -23,13 +24,14 @@
 - 스킬 `.claude/skills/travel-content/` (SKILL.md · references · scripts/tc.py · tests 21개)
 - 예제 입력 `examples/가우도/` (GPS 제거 7장) · 배포 zip `dist/` (`tools/package_skill.py`)
 - 문서 `docs/00~04`, 흐름도 `docs/diagrams/` (`build_diagrams.py` → drawio·svg, `render_png.sh` → png)
-- 발표 `docs/presentation/` (`slides.src.html` → `build.py` → index·analysis·run.html → `export_pdfs.sh` → `docs/자동화업무소개_*.pdf` 3개, 최신은 `slides_v5.src.html` → `build.py _v5` → `*_v5.pdf`, 목차 3열은 v3부터)
+- 제출 PDF(최신, 사용자가 이름 정리): `docs/여행 콘텐츠 제작 자동화.pdf`(전체) · `docs/자동화업무소개_업무분석_개선설계.pdf` · `docs/자동화업무소개_실행방법.pdf`. 이전 판은 같은 이름 끝에 `_v1`~`_v4`.
+- 발표 HTML `docs/presentation/index_v5.html`·`analysis_v5`·`run_v5` (원본 `slides_v5.src.html` → `build.py _v5` → `export_pdfs.sh _v5`가 `*_v5.pdf`를 만들므로, 만든 뒤 위 이름으로 바꿔야 함)
 - 실행 결과 `work/` (git 제외): C-001(옛 흐름, 3채널 컨펌), C-002(새 흐름, 3채널 대표 승인까지)
 
 ## 3. 남은 일
 1. C-002 게시 링크 받기(E) → `tc.py publish-all --work work/C-002_가우도 --instagram … --youtube … --tistory …`
-2. 제출 폼에 3장 제출(사용자). 구현물 링크(비공개 저장소) 처리는 사용자가 직접.
-3. 발표 시연 준비: 발표 HTML `docs/presentation/index.html`(로컬 서버 `python3 -m http.server 8765 --directory docs/presentation`), 시연은 `examples/가우도`로 새 콘텐츠 C-003.
+2. 제출 폼에 PDF 3개 제출(사용자). 구현물 링크(비공개 저장소) 처리는 사용자가 직접.
+3. 발표 시연 준비: 발표 HTML `docs/presentation/index_v5.html`(로컬 서버 `python3 -m http.server 8765 --directory docs/presentation`), 시연은 `examples/가우도`로 새 콘텐츠 C-003.
 
 ## 4. 주의
 - 원본 사진 폴더 수정 금지. 외부 게시 버튼은 사용자가 누름.

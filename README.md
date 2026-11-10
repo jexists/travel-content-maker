@@ -1,9 +1,9 @@
-# travel-content-maker · 여행 콘텐츠 3채널 자동화
+# travel-content-maker · 여행 콘텐츠 제작 자동화
 
 여행 사진 폴더와 장소 이름을 넣으면 **인스타그램 카드뉴스 → 유튜브 숏폼 → 티스토리 블로그**를 만들고, 승인·버전·게시 링크를 콘텐츠대장(`ledger.xlsx`)에 남기는 Claude Code 스킬이다.
 AX Campus 1기 4회차 개인 과제(1안 · Claude 스킬 + 로컬 파일) · 제출 2026-11-10 · 발표 2026-11-11.
 
-> 발표·제출 문서(최신 v5): [`전체_v5.pdf`](docs/자동화업무소개_전체_v5.pdf) · [`업무분석_개선설계_v5.pdf`](docs/자동화업무소개_업무분석_개선설계_v5.pdf) · [`실행방법_v5.pdf`](docs/자동화업무소개_실행방법_v5.pdf) · 발표 HTML [`docs/presentation/index_v5.html`](docs/presentation/index_v5.html) (이전 판 `_v4`·`_v3`·`_v2`·접미사 없는 파일도 보존)
+> **발표·제출 문서** — [전체 (발표)](docs/여행%20콘텐츠%20제작%20자동화.pdf) · [업무 분석·개선 설계](docs/자동화업무소개_업무분석_개선설계.pdf) · [실행 방법](docs/자동화업무소개_실행방법.pdf) · [발표 HTML](docs/presentation/index_v5.html) · [스킬 zip](dist/travel-content-skill.zip)
 
 ## 해결하려는 문제
 | 문제 | 지금(As-Is) | 이 프로젝트 |
@@ -28,7 +28,7 @@ AX Campus 1기 4회차 개인 과제(1안 · Claude 스킬 + 로컬 파일) · �
 | 실행 | Claude Code + 스킬(`.claude/skills/travel-content/SKILL.md`) | 흐름·질문·글쓰기 |
 | 스크립트 | Python 3.10+ · Pillow · openpyxl · pillow-heif (`scripts/requirements.txt`) | 이미지·HEIC·카드·대장 |
 | 영상 | ffmpeg·ffprobe (static-ffmpeg가 Mac·Windows용을 자동으로 받음) | 숏폼 합성·검사 |
-| 음성 | OpenAI `/v1/audio/speech` (선택) · Mac `say` · Windows `System.Speech` | 내레이션 |
+| 음성 | OpenAI `/v1/audio/speech` (키 있을 때) · Mac `say` · Windows `System.Speech` | 내레이션 |
 | 기타 | Chrome(선택, 업로드 입력) | — |
 
 ## 폴더 구조
@@ -37,7 +37,7 @@ AX Campus 1기 4회차 개인 과제(1안 · Claude 스킬 + 로컬 파일) · �
   SKILL.md                  흐름·확인 지점·멈춤 규칙
   references/               settings.json(기본값) · rules.json(게시 규칙) · upload.md
     prompts/                common · instagram · shorts · blog · blog_plog(원문) · confirm
-  설치방법.md               받는 사람용 3단계 (Mac·Windows)
+  설치방법.md               받는 사람용 4단계 (Mac·Windows)
   scripts/setup.py          처음 한 번 준비 (패키지·ffmpeg·음성 확인)
   scripts/tc.py             명령 모음
   scripts/*.py              insta · render_cards · make_shorts · build_blog · check_rules · review · state · ledger · usage …
@@ -45,9 +45,9 @@ AX Campus 1기 4회차 개인 과제(1안 · Claude 스킬 + 로컬 파일) · �
   tests/test_flow.py        unittest 21개
 examples/가우도/             예제 입력 사진 7장 (GPS·EXIF 제거본)
 dist/travel-content-skill.zip  배포용 스킬 zip (tools/package_skill.py)
-docs/                       분석·설계 문서(00~04) · diagrams/(drawio·svg·png) · presentation/(발표 HTML) · PDF 3개
+docs/                       분석·설계 문서(00~04) · diagrams/ · presentation/(발표 HTML) · 발표·제출 PDF 3개
 work/                       실행 결과 (git 제외) — work/C-xxx_장소/, work/ledger.xlsx
-.env.example                OPENAI_API_KEY (선택)
+.env.example                OPENAI_API_KEY (스킬 폴더에도 같은 파일)
 ```
 
 ## 설치 (Mac · Windows, 4단계)
@@ -132,4 +132,4 @@ tc status --work work/C-003_가우도
 | [docs/04_분석설계.md](docs/04_분석설계.md) | 캔버스·자료 목록·문제 카드·RACI |
 | [HANDOFF.md](HANDOFF.md) | 다음 작업자용 현재 상태 |
 
-그림 다시 만들기: `python3.12 docs/diagrams/build_diagrams.py && bash docs/diagrams/render_png.sh` · 실행 방법 그림: `python3 docs/presentation/illust/build_illust.py && bash docs/presentation/illust/render.sh` · 발표 HTML·PDF: `python3 docs/presentation/build.py _v5 && bash docs/presentation/export_pdfs.sh _v5` · 스킬 zip: `python3 tools/package_skill.py`
+그림 다시 만들기: `python3.12 docs/diagrams/build_diagrams.py && bash docs/diagrams/render_png.sh` · 실행 방법 그림: `python3 docs/presentation/illust/build_illust.py && bash docs/presentation/illust/render.sh` · 발표 HTML·PDF: `python3 docs/presentation/build.py _v5 && bash docs/presentation/export_pdfs.sh _v5` (만든 뒤 PDF 이름에서 판 번호를 뺀다) · 스킬 zip: `python3 tools/package_skill.py`
