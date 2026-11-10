@@ -33,6 +33,42 @@ code { font-family: var(--font-mono); font-size: .9em; }
 .toc-grid { grid-template-columns: repeat(4, 1fr); gap: 0 44px; }
 
 """
+V4_CSS = """
+/* v4: 흐름도 그림만 · Python 안내 · 터미널 · 효과/한계 카드 */
+img.map { display: block; max-width: 100%; max-height: 800px; width: auto; height: auto; margin: 0 auto; }
+.pyq { background: var(--card); border: 1.5px solid var(--line); border-top: 6px solid var(--accent); border-radius: 16px; padding: 34px 36px; gap: 14px; }
+.pyq .q { font: 700 22px var(--font-mono); color: var(--accent); }
+.pyq .a { font-size: 38px; font-weight: 800; line-height: 1.25; }
+.pyq .s { font-size: 24px; color: var(--muted); }
+.pyq .ways { display: flex; flex-wrap: wrap; gap: 10px; margin: 8px 0; }
+.pyq .ways .chip b { background: var(--accent); color: var(--on-accent); }
+.pyq .me { font-size: 25px; }
+.pyq .opt { font-size: 19px; color: var(--subtle); border-top: 1px solid var(--line); padding-top: 14px; margin-top: 6px; line-height: 1.5; }
+.term { background: #111418; border-radius: 16px; overflow: hidden; box-shadow: 0 18px 40px rgba(0,0,0,.18); }
+.term .bar { display: flex; align-items: center; gap: 9px; padding: 14px 18px; background: #1d2228; }
+.term .bar i { width: 14px; height: 14px; border-radius: 50%; background: #ff5f57; display: block; }
+.term .bar i:nth-child(2) { background: #febc2e; } .term .bar i:nth-child(3) { background: #28c840; }
+.term .bar span { margin-left: 14px; font: 600 17px var(--font-mono); color: #8b949e; }
+.term pre { margin: 0; padding: 26px 30px 30px; font: 500 22px/1.6 var(--font-mono); color: #e6edf3; white-space: pre; }
+.term .pr { color: #3cc39a; font-weight: 700; } .term .cm { color: #fff; font-weight: 700; }
+.term .hd { color: #79c0ff; font-weight: 700; } .term .dim { color: #8b949e; }
+.term .tip { color: #e3b341; } .term .done { color: #3cc39a; font-weight: 800; }
+.fixes { gap: 12px; }
+.fixes .fh { font-size: 28px; font-weight: 800; margin-bottom: 6px; }
+.fixes .fx { display: grid; grid-template-columns: 250px 52px 1fr; align-items: center; background: var(--card); border: 1.5px solid var(--line); border-radius: 12px; padding: 16px 20px; }
+.fixes .fx .p { font-size: 22px; font-weight: 700; color: var(--warn); }
+.fixes .fx .ar svg { width: 34px; height: 20px; } .fixes .fx .ar path { fill: var(--subtle); }
+.fixes .fx .s { font-size: 22px; }
+.fixes .fx.me { border-style: dashed; } .fixes .fx.me .p { color: var(--ink); }
+.eff { display: grid; grid-template-columns: 1fr 1fr; gap: 44px; }
+.eff .colh { font-size: 30px; font-weight: 800; display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+.eff .it { display: flex; align-items: center; gap: 20px; background: var(--card); border: 1.5px solid var(--line); border-radius: 14px; padding: 18px 24px; margin-bottom: 12px; }
+.eff .ic { width: 46px; height: 46px; flex: none; border-radius: 50%; display: grid; place-items: center; color: #fff; font-size: 24px; font-weight: 900; }
+.eff .ic.ok { background: var(--ok); } .eff .ic.wn { background: var(--warn); }
+.eff .it .w { font-size: 26px; font-weight: 800; }
+.eff .it .h { font-size: 20px; color: var(--muted); margin-top: 3px; }
+.eff .it .tag { margin-left: auto; font: 700 19px var(--font-mono); color: var(--accent); }
+"""
 VARIANTS = {
     "index.html": dict(parts=None, kicker="AX Campus 1기 · 4회차 개인 과제",
                        title="여행 콘텐츠 3채널 자동화", h1="여행 콘텐츠<br>3채널 자동화", sub="사진 폴더 하나로 인스타 카드뉴스 · 유튜브 숏폼 · 티스토리 블로그"),
@@ -98,7 +134,7 @@ def build(ver=""):
     tpl = TPL.read_text(encoding="utf-8")
     tpl = tokens(tpl, ':root, html[data-theme="light"]', TOKENS_LIGHT)
     tpl = tokens(tpl, 'html[data-theme="dark"]', TOKENS_DARK)
-    tpl = tpl.replace("</style>", EXTRA_CSS + (V3_CSS if ver >= "_v3" else "") + "</style>", 1)
+    tpl = tpl.replace("</style>", EXTRA_CSS + (V3_CSS if ver >= "_v3" else "") + (V4_CSS if ver >= "_v4" else "") + "</style>", 1)
     ncol = 3 if ver >= "_v3" else 4  # v1·v2는 4열 그대로
     tpl = re.sub(r"<template id=\"opt-[^\"]+\">.*?</template>\s*", "", tpl, flags=re.S)  # 쓰지 않는 선택 조각 제거
     # 내용 장 자리 표시 1장을 지운다 (목차 장 다음 ~ </main>)
@@ -110,7 +146,7 @@ def build(ver=""):
     blocks = re.findall(r"(<section class=\"slide\" data-part=\"\w+\".*?</section>)", src, flags=re.S)
     for name, v in VARIANTS.items():
         v = dict(v)
-        if ver in ("_v2", "_v3") and name == "run.html":
+        if ver >= "_v2" and name == "run.html":
             v["sub"] = "스킬 zip 하나로 3단계 · Mac·Windows"
         chosen = [b for p, b in zip(slides, blocks) if v["parts"] is None or p in v["parts"]]
         html = head + "\n\n" + "\n\n".join(chosen) + "\n\n" + tail

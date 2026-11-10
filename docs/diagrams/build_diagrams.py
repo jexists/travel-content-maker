@@ -336,3 +336,14 @@ v.nodes["x3"]["label"] = "Mac say / Win 음성\n(선택: Chrome)"
 v.nodes["k1"]["label"] = "SKILL.md ·\nsetup.py 첫 준비"
 v.build()
 print("done:", sorted(p.name for p in OUT.iterdir() if p.suffix in (".drawio", ".svg")))
+# ================= 시스템 구성도 v3 (발표 v4용 가로로 긴 판: 칸 간격 1.45배, 레인 높이 112) =================
+LANE_H = 112
+w3 = Diagram("architecture_v3", [H, AIL, SC, TOOL, ST], 12)
+for k, n in v.nodes.items():
+    col = (n["cx"] - HEAD_W - PAD) / COL_W - 0.5
+    lane = v.lanes[int(n["cy"] // 150)]
+    w3.node(k, lane, col * 1.45, n["label"], n["kind"], n["style"])
+w3.nodes["x2"]["label"] = "ffmpeg 자동 ·\nOpenAI TTS"
+w3.nodes["x3"]["label"] = "OS 기본 음성\n(선택: Chrome)"
+w3.edges, w3.badges = list(v.edges), list(v.badges)
+w3.build()

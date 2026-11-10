@@ -24,7 +24,7 @@ description: 여행 사진 폴더와 여행지 이름을 받아 인스타 카드
 ### 준비 문제 해결 (setup.py ❌ 줄)
 | 증상 | Claude가 먼저 할 일 | 사용자에게 부탁 |
 | --- | --- | --- |
-| `python`을 못 찾음 | `python3`·`py -3`로 다시 | 설치돼 있지 않으면 python.org 설치(Windows는 "Add to PATH" 체크) |
+| `python`을 못 찾음 · 3.10 미만 | `python3`·`py -3`로 다시 → 없으면 **Claude가 설치**: Windows `winget install -e --id Python.Python.3.12 --scope user` · Mac `brew install python@3.12`(brew 있을 때) · 둘 다 안 되면 uv(Mac `curl -LsSf https://astral.sh/uv/install.sh \| sh`, Windows `powershell -c "irm https://astral.sh/uv/install.ps1 \| iex"`) → `uv venv --seed -p 3.12 "<SKILL_DIR>/.venv"` 만들고 그 python으로 setup.py | 명령 실행 승인 (원하면 python.org에서 직접 설치, Windows는 "Add python.exe to PATH" 체크) |
 | 패키지 설치 실패(권한·externally-managed) | 스킬 폴더에 `.venv` 만들고 그 python으로 setup.py 다시 | — |
 | ffmpeg 없음(자동 다운로드 막힘) | Mac `brew install ffmpeg` / Windows `winget install Gyan.FFmpeg` 실행 제안 | 관리자 권한 승인 |
 | 음성 없음 | Windows 설정 > 시간 및 언어 > 음성에서 한국어 음성 추가 안내, 또는 OpenAI 키 | `.env`에 키 넣기 |

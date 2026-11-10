@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1564" height="616" viewBox="0 0 1564 616" font-family="Pretendard, Apple SD Gothic Neo, sans-serif">
+<defs><marker id="mnormal" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto"><path d="M0 0L10 5L0 10z" fill="#0F6E56"/></marker><marker id="mloop" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto"><path d="M0 0L10 5L0 10z" fill="#D85A30"/></marker><marker id="mdata" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto"><path d="M0 0L10 5L0 10z" fill="#8A8F8B"/></marker></defs>
+<rect width="1564" height="616" fill="#FFFFFF"/>
+<rect x="0.5" y="0.5" width="1563" height="112" fill="none" stroke="#C9CDC9"/>
+<rect x="0.5" y="0.5" width="112" height="112" fill="#EEF3F0" stroke="#C9CDC9"/>
+<text text-anchor="middle" dominant-baseline="central" font-size="14.5" fill="#1F2421" font-weight="700"><tspan x="56.0" y="56.0">사람</tspan></text>
+<rect x="0.5" y="112.5" width="1563" height="112" fill="none" stroke="#C9CDC9"/>
+<rect x="0.5" y="112.5" width="112" height="112" fill="#EEF3F0" stroke="#C9CDC9"/>
+<text text-anchor="middle" dominant-baseline="central" font-size="14.5" fill="#1F2421" font-weight="700"><tspan x="56.0" y="158.6">Claude Code</tspan><tspan x="56.0" y="177.4">스킬</tspan></text>
+<rect x="0.5" y="224.5" width="1563" height="112" fill="none" stroke="#C9CDC9"/>
+<rect x="0.5" y="224.5" width="112" height="112" fill="#EEF3F0" stroke="#C9CDC9"/>
+<text text-anchor="middle" dominant-baseline="central" font-size="14.5" fill="#1F2421" font-weight="700"><tspan x="56.0" y="270.6">스크립트</tspan><tspan x="56.0" y="289.4">tc.py</tspan></text>
+<rect x="0.5" y="336.5" width="1563" height="112" fill="none" stroke="#C9CDC9"/>
+<rect x="0.5" y="336.5" width="112" height="112" fill="#EEF3F0" stroke="#C9CDC9"/>
+<text text-anchor="middle" dominant-baseline="central" font-size="14.5" fill="#1F2421" font-weight="700"><tspan x="56.0" y="392.0">외부 도구·API</tspan></text>
+<rect x="0.5" y="448.5" width="1563" height="112" fill="none" stroke="#C9CDC9"/>
+<rect x="0.5" y="448.5" width="112" height="112" fill="#EEF3F0" stroke="#C9CDC9"/>
+<text text-anchor="middle" dominant-baseline="central" font-size="14.5" fill="#1F2421" font-weight="700"><tspan x="56.0" y="494.6">저장</tspan><tspan x="56.0" y="513.4">(로컬 PC)</tspan></text>
+<path d="M189.0 87.0 L189.0 109.0 L360.1 109.0 L360.1 131.0" fill="none" stroke="#0F6E56" stroke-width="2.2" marker-end="url(#mnormal)"/>
+<path d="M360.1 205.0 L360.1 243.0" fill="none" stroke="#0F6E56" stroke-width="2.2" marker-end="url(#mnormal)"/>
+<path d="M412.1 280.0 L650.3 280.0" fill="none" stroke="#0F6E56" stroke-width="2.2" marker-end="url(#mnormal)"/>
+<path d="M754.3 280.0 L906.9 280.0" fill="none" stroke="#0F6E56" stroke-width="2.2" marker-end="url(#mnormal)"/>
+<path d="M1010.9 280.0 L1163.6 280.0" fill="none" stroke="#0F6E56" stroke-width="2.2" marker-end="url(#mnormal)"/>
+<path d="M1267.6 280.0 L1420.2 280.0" fill="none" stroke="#0F6E56" stroke-width="2.2" marker-end="url(#mnormal)"/>
+<path d="M702.3 131.0 L702.3 56.0 L819.4 56.0" fill="none" stroke="#0F6E56" stroke-width="2.2" marker-end="url(#mnormal)"/>
+<path d="M903.4 76.4 L903.4 159.7 L929.9 159.7 L929.9 243.0" fill="none" stroke="#0F6E56" stroke-width="2.2" marker-end="url(#mnormal)"/>
+<path d="M1472.2 102.0 L1472.2 243.0" fill="none" stroke="#0F6E56" stroke-width="2.2" marker-end="url(#mnormal)"/>
+<path d="M672.3 317.0 L672.3 336.0 L531.2 336.0 L531.2 355.0" fill="none" stroke="#8A8F8B" stroke-width="2.2" stroke-dasharray="7 5" marker-end="url(#mdata)"/>
+<path d="M958.9 317.0 L958.9 355.0" fill="none" stroke="#8A8F8B" stroke-width="2.2" stroke-dasharray="7 5" marker-end="url(#mdata)"/>
+<path d="M1255.6 317.0 L1255.6 336.0 L1287.5 336.0 L1287.5 355.0" fill="none" stroke="#8A8F8B" stroke-width="2.2" stroke-dasharray="7 5" marker-end="url(#mdata)"/>
+<path d="M702.3 473.0 L702.3 317.0" fill="none" stroke="#8A8F8B" stroke-width="2.2" stroke-dasharray="7 5" marker-end="url(#mdata)"/>
+<path d="M1215.6 317.0 L1215.6 469.0" fill="none" stroke="#8A8F8B" stroke-width="2.2" stroke-dasharray="7 5" marker-end="url(#mdata)"/>
+<path d="M1472.2 317.0 L1472.2 469.0" fill="none" stroke="#8A8F8B" stroke-width="2.2" stroke-dasharray="7 5" marker-end="url(#mdata)"/>
+<path d="M137.0 25.0 H241.0 V78.0 Q215.0 69.0 189.0 78.0 T137.0 78.0 Z" fill="#F6F7F6" stroke="#8A8F8B" stroke-width="1.5"/>
+<text text-anchor="middle" dominant-baseline="central" font-size="13.5" fill="#1F2421"><tspan x="189.0" y="43.2">스킬 zip 넣기</tspan><tspan x="189.0" y="60.8">+ 사진 폴더</tspan></text>
+<polygon points="873.4,10.0 927.4,56.0 873.4,102.0 819.4,56.0" fill="#FFFFFF" stroke="#0F6E56" stroke-width="2"/>
+<text text-anchor="middle" dominant-baseline="central" font-size="13" fill="#1F2421" font-weight="700"><tspan x="873.4" y="47.5">확인 지점</tspan><tspan x="873.4" y="64.5">A·B·C 답</tspan></text>
+<polygon points="1472.25,10.0 1526.25,56.0 1472.25,102.0 1418.25,56.0" fill="#FFFFFF" stroke="#0F6E56" stroke-width="2"/>
+<text text-anchor="middle" dominant-baseline="central" font-size="13" fill="#1F2421" font-weight="700"><tspan x="1472.2" y="47.5">D 대표 승인</tspan><tspan x="1472.2" y="64.5">E 링크</tspan></text>
+<rect x="308.1" y="131.0" width="104" height="74" rx="9" fill="#E3F2EC" stroke="#0F6E56" stroke-width="1.6"/>
+<text text-anchor="middle" dominant-baseline="central" font-size="13.5" fill="#1F2421"><tspan x="360.1" y="159.2">SKILL.md ·</tspan><tspan x="360.1" y="176.8">setup.py 첫 준비</tspan></text>
+<rect x="650.3" y="131.0" width="104" height="74" rx="9" fill="#E3F2EC" stroke="#0F6E56" stroke-width="1.6"/>
+<text text-anchor="middle" dominant-baseline="central" font-size="13.5" fill="#1F2421"><tspan x="702.3" y="159.2">prompts/</tspan><tspan x="702.3" y="176.8">채널별 작성 규칙</tspan></text>
+<rect x="308.1" y="243.0" width="104" height="74" rx="9" fill="#FFFFFF" stroke="#0F6E56" stroke-width="1.6"/>
+<text text-anchor="middle" dominant-baseline="central" font-size="13.5" fill="#1F2421"><tspan x="360.1" y="271.2">insta-pick·use</tspan><tspan x="360.1" y="288.8">사진·시트</tspan></text>
+<rect x="650.3" y="243.0" width="104" height="74" rx="9" fill="#FFFFFF" stroke="#0F6E56" stroke-width="1.6"/>
+<text text-anchor="middle" dominant-baseline="central" font-size="13.5" fill="#1F2421"><tspan x="702.3" y="271.2">render_cards</tspan><tspan x="702.3" y="288.8">인스타 카드</tspan></text>
+<rect x="906.9" y="243.0" width="104" height="74" rx="9" fill="#FFFFFF" stroke="#0F6E56" stroke-width="1.6"/>
+<text text-anchor="middle" dominant-baseline="central" font-size="13.5" fill="#1F2421"><tspan x="958.9" y="271.2">make_shorts</tspan><tspan x="958.9" y="288.8">숏폼</tspan></text>
+<rect x="1163.6" y="243.0" width="104" height="74" rx="9" fill="#FFFFFF" stroke="#0F6E56" stroke-width="1.6"/>
+<text text-anchor="middle" dominant-baseline="central" font-size="13.5" fill="#1F2421"><tspan x="1215.6" y="271.2">build_blog</tspan><tspan x="1215.6" y="288.8">블로그</tspan></text>
+<rect x="1420.2" y="243.0" width="104" height="74" rx="9" fill="#FFFFFF" stroke="#0F6E56" stroke-width="1.6"/>
+<text text-anchor="middle" dominant-baseline="central" font-size="13.5" fill="#1F2421"><tspan x="1472.2" y="271.2">check_rules</tspan><tspan x="1472.2" y="288.8">state·ledger</tspan></text>
+<rect x="479.2" y="355.0" width="104" height="74" rx="9" fill="#FFFFFF" stroke="#8A8F8B" stroke-width="1.6"/>
+<text text-anchor="middle" dominant-baseline="central" font-size="13.5" fill="#1F2421"><tspan x="531.2" y="383.2">Pillow ·</tspan><tspan x="531.2" y="400.8">pillow-heif(HEIC)</tspan></text>
+<rect x="906.9" y="355.0" width="104" height="74" rx="9" fill="#FFFFFF" stroke="#8A8F8B" stroke-width="1.6"/>
+<text text-anchor="middle" dominant-baseline="central" font-size="13.5" fill="#1F2421"><tspan x="958.9" y="383.2">ffmpeg 자동 ·</tspan><tspan x="958.9" y="400.8">OpenAI TTS</tspan></text>
+<rect x="1266.3" y="355.0" width="104" height="74" rx="9" fill="#FFFFFF" stroke="#8A8F8B" stroke-width="1.6"/>
+<text text-anchor="middle" dominant-baseline="central" font-size="13.5" fill="#1F2421"><tspan x="1318.3" y="383.2">OS 기본 음성</tspan><tspan x="1318.3" y="400.8">(선택: Chrome)</tspan></text>
+<path d="M650.3 473.0 H754.3 V526.0 Q728.3 517.0 702.3 526.0 T650.3 526.0 Z" fill="#F6F7F6" stroke="#8A8F8B" stroke-width="1.5"/>
+<text text-anchor="middle" dominant-baseline="central" font-size="13.5" fill="#1F2421"><tspan x="702.3" y="491.2">settings·rules</tspan><tspan x="702.3" y="508.8">.json</tspan></text>
+<path d="M1163.6 478.0 V530.0 A52.0 9 0 0 0 1267.6 530.0 V478.0" fill="#F6F7F6" stroke="#8A8F8B" stroke-width="1.5"/>
+<ellipse cx="1215.6" cy="478.0" rx="52.0" ry="9" fill="#F6F7F6" stroke="#8A8F8B" stroke-width="1.5"/>
+<text text-anchor="middle" dominant-baseline="central" font-size="13.5" fill="#1F2421"><tspan x="1215.6" y="502.2">work/C-xxx/</tspan><tspan x="1215.6" y="519.8">채널/vN</tspan></text>
+<path d="M1420.25 478.0 V530.0 A52.0 9 0 0 0 1524.25 530.0 V478.0" fill="#F6F7F6" stroke="#8A8F8B" stroke-width="1.5"/>
+<ellipse cx="1472.25" cy="478.0" rx="52.0" ry="9" fill="#F6F7F6" stroke="#8A8F8B" stroke-width="1.5"/>
+<text text-anchor="middle" dominant-baseline="central" font-size="13.5" fill="#1F2421"><tspan x="1472.2" y="511.0">ledger.xlsx</tspan></text>
+<rect x="883.9" y="107.1" width="39.0" height="22" rx="11" fill="#FFFFFF" stroke="#0F6E56" stroke-width="1"/>
+<text text-anchor="middle" dominant-baseline="central" font-size="12" fill="#0F6E56" font-weight="700"><tspan x="903.4" y="118.1">승인</tspan></text>
+<circle cx="25" cy="590" r="8" fill="#fff" stroke="#1F2421" stroke-width="1.5"/>
+<text x="46" y="595" font-size="13" fill="#5C625E">시작·종료</text>
+<rect x="137" y="582" width="22" height="16" rx="3" fill="#fff" stroke="#1F2421" stroke-width="1.5"/>
+<text x="167" y="595" font-size="13" fill="#5C625E">작업</text>
+<polygon points="230,580 241,590 230,600 219,590" fill="#fff" stroke="#0F6E56" stroke-width="1.5"/>
+<text x="249" y="595" font-size="13" fill="#5C625E">판단</text>
+<path d="M301 582 H323 V595 Q317 591 312 595 T301 595 Z" fill="#F6F7F6" stroke="#8A8F8B" stroke-width="1.4"/>
+<text x="331" y="595" font-size="13" fill="#5C625E">자료</text>
+<path d="M383 584 V596 A11 4 0 0 0 405 596 V584" fill="#F6F7F6" stroke="#8A8F8B" stroke-width="1.4"/><ellipse cx="394" cy="584" rx="11" ry="4" fill="#F6F7F6" stroke="#8A8F8B" stroke-width="1.4"/>
+<text x="413" y="595" font-size="13" fill="#5C625E">보관</text>
+<path d="M465 590 H495" stroke="#0F6E56" stroke-width="2.2" marker-end="url(#mnormal)"/>
+<text x="503" y="595" font-size="13" fill="#5C625E">정상 진행</text>
+<path d="M594 590 H624" stroke="#D85A30" stroke-width="2.2" stroke-dasharray="7 5" marker-end="url(#mloop)"/>
+<text x="632" y="595" font-size="13" fill="#5C625E">재확인·되돌림</text>
+<path d="M749 590 H779" stroke="#8A8F8B" stroke-width="2.2" stroke-dasharray="7 5" marker-end="url(#mdata)"/>
+<text x="787" y="595" font-size="13" fill="#5C625E">자료 연결</text>
+</svg>
