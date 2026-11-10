@@ -25,6 +25,11 @@ pre.code-out { font: 500 22px/1.55 var(--font-mono); background: var(--card2); b
 ol.nums { padding-left: 34px; display: flex; flex-direction: column; gap: 10px; font-size: 25px; }
 ol.nums li::marker { font-family: var(--font-mono); color: var(--accent); font-weight: 700; }
 code { font-family: var(--font-mono); font-size: .9em; }
+/* 표지: 초록 막대가 kicker~발표자까지 감싸도록, 버튼·안내 간격 */
+.cover .bar { display: none; }
+.cover .inner { max-width: 1500px; }
+.cover .ctext { display: flex; flex-direction: column; gap: 28px; border-left: 14px solid var(--accent); margin-left: -64px; padding: 6px 0 6px 50px; }
+.cover .keyhint { margin-top: 18px; }
 """
 VARIANTS = {
     "index.html": dict(parts=None, kicker="AX Campus 1기 · 4회차 개인 과제",
@@ -34,7 +39,7 @@ VARIANTS = {
     "run.html": dict(parts={"run"}, kicker="제출물 ③ · 실행 방법",
                      title="travel-content 실행 방법", h1="travel-content<br>실행 방법", sub="설치부터 결과 확인까지 8단계"),
 }
-WHO = "jexists · 2026.11.11"
+WHO = "정주애 · 2026.11.11"
 
 
 def tokens(css, block_sel, vals):
@@ -62,6 +67,8 @@ def build():
     for name, v in VARIANTS.items():
         chosen = [b for p, b in zip(slides, blocks) if v["parts"] is None or p in v["parts"]]
         html = head + "\n\n" + "\n\n".join(chosen) + "\n\n" + tail
+        html = re.sub(r'(<div class="kicker r">\{\{행사·과목 이름\}\}</div>.*?<div class="who r">.*?</div>)',
+                      r'<div class="ctext">\1</div>', html, count=1, flags=re.S)
         html = html.replace('<h1 class="r">{{발표 제목}}</h1>', f'<h1 class="r">{v.get("h1", v["title"])}</h1>', 1)
         html = (html.replace("{{발표 제목}}", v["title"]).replace("{{행사·과목 이름}}", v["kicker"])
                     .replace("{{한 줄 설명 — 명사형}}", v["sub"]).replace("{{발표자}} · {{YYYY.MM.DD}}", WHO))
