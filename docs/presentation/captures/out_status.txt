@@ -1,0 +1,26 @@
+C-002 가우도 · 인스타 사진: fixed · 승인: 단계마다 에디터, 배포 직전 대표
+  인스타: v1 approved
+  유튜브: v1 approved
+  티스토리: v1 approved
+  대장 기록 15줄 → work/ledger.xlsx
+  사진 사용표 → /Volumes/Jexists/axc1/_homework/week3-proj-wed/work/C-002_가우도/usage.md
+
+결과물 (✅ 실제 파일 있음 · ❌ 없음)
+  [인스타 v1]
+    ✅ 카드 이미지: 6개 · /Volumes/Jexists/axc1/_homework/week3-proj-wed/work/C-002_가우도/instagram/v1
+    ✅ 표지(썸네일): /Volumes/Jexists/axc1/_homework/week3-proj-wed/work/C-002_가우도/instagram/v1/card_01.jpg
+    ✅ 캡션: /Volumes/Jexists/axc1/_homework/week3-proj-wed/work/C-002_가우도/instagram/v1/caption.txt
+  [유튜브 v1]
+    ✅ 최종 MP4: /Volumes/Jexists/axc1/_homework/week3-proj-wed/work/C-002_가우도/youtube/v1/shorts.mp4
+    ✅ 영상 대본: /Volumes/Jexists/axc1/_homework/week3-proj-wed/work/C-002_가우도/youtube/v1/script.txt
+    ✅ TTS 음성: /Volumes/Jexists/axc1/_homework/week3-proj-wed/work/C-002_가우도/youtube/v1/voice.m4a
+    ✅ 자막: /Volumes/Jexists/axc1/_homework/week3-proj-wed/work/C-002_가우도/youtube/v1/subtitles.srt
+    ✅ 제목·설명·태그: /Volumes/Jexists/axc1/_homework/week3-proj-wed/work/C-002_가우도/youtube/v1/meta.txt
+  [티스토리 v1]
+    ✅ 블로그 글(HTML): /Volumes/Jexists/axc1/_homework/week3-proj-wed/work/C-002_가우도/tistory/v1/post.html
+    ✅ 블로그 글(Markdown): /Volumes/Jexists/axc1/_homework/week3-proj-wed/work/C-002_가우도/tistory/v1/article.md
+    ✅ 미리보기: /Volumes/Jexists/axc1/_homework/week3-proj-wed/work/C-002_가우도/tistory/v1/preview.html
+    ✅ 블로그 이미지: 7개 · /Volumes/Jexists/axc1/_homework/week3-proj-wed/work/C-002_가우도/tistory/v1/images
+    ✅ 제목: /Volumes/Jexists/axc1/_homework/week3-proj-wed/work/C-002_가우도/tistory/v1/title.txt
+    ✅ 태그: /Volumes/Jexists/axc1/_homework/week3-proj-wed/work/C-002_가우도/tistory/v1/tags.txt
+  → /Volumes/Jexists/axc1/_homework/week3-proj-wed/work/C-002_가우도/OUTPUTS.md

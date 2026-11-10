@@ -1,0 +1,9 @@
+## [D·E] 최종 체크리스트 — C-002 가우도
+
+| 채널 | 버전 | 점검 | 에디터 컨펌 | 대표 승인 | 게시 링크 | 결과물 |
+| --- | --- | --- | --- | --- | --- | --- |
+| 인스타 | v1 | ✅ | ✅ | ✅ | ☐ | [열기](file:///Volumes/Jexists/axc1/_homework/week3-proj-wed/work/C-002_%EA%B0%80%EC%9A%B0%EB%8F%84/instagram/v1/card_01.jpg) |
+| 유튜브 | v1 | ✅ | ✅ | ✅ | ☐ | [열기](file:///Volumes/Jexists/axc1/_homework/week3-proj-wed/work/C-002_%EA%B0%80%EC%9A%B0%EB%8F%84/youtube/v1/shorts.mp4) |
+| 티스토리 | v1 | ✅ | ✅ | ✅ | ☐ | [열기](file:///Volumes/Jexists/axc1/_homework/week3-proj-wed/work/C-002_%EA%B0%80%EC%9A%B0%EB%8F%84/tistory/v1/preview.html) |
+
+**답은 한 메시지로** (링크): 올린 뒤 게시물 링크를 한 번에 — `인스타 …, 유튜브 …, 티스토리 …` (메인 주소 말고 게시물 주소)

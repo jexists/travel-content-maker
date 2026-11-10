@@ -1,0 +1,7 @@
+..../Volumes/Jexists/axc1/_homework/week3-proj-wed/.claude/skills/travel-content/scripts/scan_photos.py:25: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+  px = list(small.getdata())
+.............
+----------------------------------------------------------------------
+Ran 17 tests in 5.157s
+
+OK

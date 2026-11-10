@@ -1,39 +1,128 @@
-# 여행 콘텐츠 3채널 제작 자동화
+# travel-content-maker · 여행 콘텐츠 3채널 자동화
 
-AX Campus 4회차 개인 과제 · 제출 2026-11-10 23:59 · 발표 2026-11-11
+여행 사진 폴더와 장소 이름을 넣으면 **인스타그램 카드뉴스 → 유튜브 숏폼 → 티스토리 블로그**를 만들고, 승인·버전·게시 링크를 콘텐츠대장(`ledger.xlsx`)에 남기는 Claude Code 스킬이다.
+AX Campus 1기 4회차 개인 과제(1안 · Claude 스킬 + 로컬 파일) · 제출 2026-11-10 · 발표 2026-11-11.
 
-사진과 메모를 넣으면 **인스타그램 → 유튜브 숏폼 → 티스토리** 순서로 콘텐츠를 만들고, 채널마다 매니저가 컨펌하고 대표가 최종 승인하며, 모든 버전과 승인 기록을 콘텐츠대장에 남긴다. (1안 · Claude 스킬 + 로컬 파일)
+> 발표·제출 문서: [`docs/자동화업무소개_전체.pdf`](docs/자동화업무소개_전체.pdf) · [`업무분석_개선설계.pdf`](docs/자동화업무소개_업무분석_개선설계.pdf) · [`실행방법.pdf`](docs/자동화업무소개_실행방법.pdf) · 발표 HTML [`docs/presentation/index.html`](docs/presentation/index.html)
 
-> 이어서 작업한다면 먼저 [HANDOFF.md](HANDOFF.md)를 읽는다 (결정 사항·진행 상황·남은 일).
-
-**저장소 이름**: `travel-content-maker` · **서비스 이름(안)**: **tripfolio** — 여행 한 번의 사진 묶음을 카드뉴스·숏폼·블로그 한 세트(폴리오)로 만든다는 뜻. 나중에 서비스로 만들 때 이 이름을 쓴다.
-
-## 스킬 위치와 실행
-
-- 스킬: [`.claude/skills/travel-content/`](.claude/skills/travel-content/SKILL.md) — Claude Code가 자동 인식
-  - `references/settings.json` 기본 설정 · `references/rules.json` 게시 규칙 · `references/prompts/` 채널별 작성 규칙
-  - `scripts/tc.py` 명령 모음 (`init scan catalog select plan build confirm reject publish status review`)
-- 준비: `python3.12 -m venv .venv && .venv/bin/pip install -r .claude/skills/travel-content/scripts/requirements.txt`, `ffmpeg`, macOS `say`(한국어 Yuna)
-- 숏폼 OpenAI TTS: `cp .env.example .env` 후 `OPENAI_API_KEY` 입력 (`.env`는 git 제외, 비우면 `say`로 대신 만듦)
-- 작업 결과(`work/`)는 저장소에 올리지 않는다 (사진 복사본·영상 용량, `.gitignore`).
-- 폰트: Pretendard(OFL), 나눔손글씨 중학생·티몬 몬소리(instpic 저장소에서 복사 — 티몬 몬소리 라이선스 원문 확인 필요).
-
-## 최종 제출 문서 구성
-
-**업무명 → 1. 현재 업무 분석 → 2. 개선 설계 → 3. 시스템 → 4. 실행 방법** 순서로 정리해야 한다. 항목별 내용과 진행 상태는 [00 제출 문서 구성](docs/00_제출문서_구성.md) 참고.
-
-## 작업 문서
-
-| 문서 | 내용 | 제출물 |
+## 해결하려는 문제
+| 문제 | 지금(As-Is) | 이 프로젝트 |
 | --- | --- | --- |
-| [00 제출 문서 구성](docs/00_제출문서_구성.md) | 최종 문서 5개 항목, 항목별 체크리스트, 상태 | — |
-| [01 과제 기준 — 노션 정리](docs/01_과제기준_노션정리.md) | 과제 안내, 제출물·완료 기준, 수업 작성 기준 | — |
-| [02 요구사항](docs/02_요구사항.md) | 내가 말한 요구, 결정 기록, 역할, 기능·비기능 요구, 게시 규칙, 수용 기준 | ② |
-| [03 업무 흐름도](docs/03_업무흐름도.md) | As-Is·To-Be 프로세스맵, 시스템 구성도 (Draw.io) | ①② |
-| [04 분석·설계 상세](docs/04_분석설계.md) | 캔버스, 자료 목록, 문제 카드, 기준선, 안 선택, RACI·CRUD, 대장 구조, 설계 10항목 | ①② |
-| ③ 자동화 구현물 | 구현 후 작성 | ③ |
+| P1 카드 수작업 | 표지를 매번 손으로 | 표지 템플릿(instpic 디자인)으로 첫 장만 자동 생성 |
+| P2 반복 작성 | 채널마다 정보를 다시 찾고 씀 | `content.json` 브리프 하나로 3채널 |
+| P3 숏폼 못 함 | 편집 부담으로 유튜브 미시작 | 사진 + 대본 → TTS·자막·전환 들어간 MP4 |
+| P4·P5 검토·규칙 | 메신저 검토, 눈으로 규칙 확인 | 확인 지점 A~E + `rules.json` 자동 점검 |
+| P6 기록 없음 | 링크·이력이 흩어짐 | `ledger.xlsx` 콘텐츠대장 + `OUTPUTS.md` |
 
-## 그림
+## 주요 기능
+- **사진**: 20장 이하는 전부, 넘으면 AI가 20장 선택 · GPS·EXIF 제거 복사 · 번호 시트 · 사용자가 고른 폴더(`insta_mine/`)로 교체
+- **인스타**: 첫 장만 `#지역 #동네` + 장소명 표지, 2장부터 원본 사진 · 캡션·해시태그 · 카드 1~20장
+- **숏폼**: 장면별 대본 → OpenAI TTS(`gpt-4o-mini-tts`, 키 없으면 macOS `say`) → 자막 PNG·훅 문구·줌/팬·전환 → 1080×1920 MP4 + `voice.m4a`·`subtitles.srt`
+- **블로그**: plog 여행 프롬프트 기준, 글→사진→글 배치, 제목 후보 5개 → `post.html`·`article.md`·`preview.html`
+- **관리**: 순서 강제(`state.json`), 채널별 버전 v1·v2, 규칙 자동 점검(`check.md`), 대장 기록(추가만·중복 방지), 결과물 존재 확인(✅/❌)
+- **질문은 5번만**: A 브리프+인스타 · B 영상 대본 · C 블로그 제목·내용 · D 대표 최종 승인 · E 게시 링크
 
-`docs/diagrams/` — `asis` · `tobe` · `architecture` 각각 `.drawio`(편집 원본) · `.png` · `.svg`
-다시 만들기: `python3.12 docs/diagrams/build_diagrams.py`
+## 기술 스택
+| 구분 | 사용 | 역할 |
+| --- | --- | --- |
+| 실행 | Claude Code + 스킬(`.claude/skills/travel-content/SKILL.md`) | 흐름·질문·글쓰기 |
+| 스크립트 | Python 3.12 · Pillow · openpyxl (`scripts/requirements.txt`) | 이미지·카드·대장 |
+| 영상 | ffmpeg·ffprobe | 숏폼 합성·검사 |
+| 음성 | OpenAI `/v1/audio/speech` (선택) · macOS `say` | 내레이션 |
+| 기타 | macOS `sips`(HEIC 변환) · Chrome(선택, 업로드 입력) | — |
+
+## 폴더 구조
+```
+.claude/skills/travel-content/
+  SKILL.md                  흐름·확인 지점·멈춤 규칙
+  references/               settings.json(기본값) · rules.json(게시 규칙) · upload.md
+    prompts/                common · instagram · shorts · blog · blog_plog(원문) · confirm
+  scripts/tc.py             명령 모음 (아래)
+  scripts/*.py              insta · render_cards · make_shorts · build_blog · check_rules · review · state · ledger · usage …
+  assets/fonts/             Pretendard · 나눔손글씨 중학생 · 티몬 몬소리
+  tests/test_flow.py        unittest 17개
+examples/가우도/             예제 입력 사진 7장 (GPS·EXIF 제거본)
+docs/                       분석·설계 문서(00~04) · diagrams/(drawio·svg·png) · presentation/(발표 HTML) · PDF 3개
+work/                       실행 결과 (git 제외) — work/C-xxx_장소/, work/ledger.xlsx
+.env.example                OPENAI_API_KEY (선택)
+```
+
+## 설치·환경 설정 (macOS)
+```bash
+brew install python@3.12 ffmpeg
+curl -fsSL https://claude.ai/install.sh | bash      # Claude Code (Pro·Max·Team·Console 계정 필요)
+git clone https://github.com/jexists/travel-content-maker.git && cd travel-content-maker   # 비공개 저장소
+python3.12 -m venv .venv
+.venv/bin/pip install -r .claude/skills/travel-content/scripts/requirements.txt
+cp .env.example .env        # 선택: OPENAI_API_KEY= 뒤에 키. 비우면 say 목소리
+```
+`.env`는 git에 올라가지 않는다. 키를 `.env.example`이나 채팅에 넣지 않는다.
+
+## 실행 방법
+**Claude Code로 (권장)** — 프로젝트 폴더에서 `claude` 실행 후:
+```
+examples/가우도 사진으로 여행 콘텐츠 만들어줘. 장소는 가우도
+```
+스킬이 사진을 추리고 정보를 검색한 뒤, 확인 지점마다 카드 하나를 보여 준다. 답은 한 메시지로 한다.
+
+| 지점 | 보는 것 | 답 예시 |
+| --- | --- | --- |
+| A | 순서 시트(1번=표지) · 표지 문구 · 캡션 · 검색 정보 | `이대로` / 고칠 것 / `내가 고를게` |
+| B | 영상 제목 · 장면별 대본 | `이대로` / 고칠 문장 |
+| C | 블로그 제목 후보 5개 · 미리보기 | `2번 제목으로 이대로` |
+| D | 세 채널 체크리스트 | `대표 승인 전부` / `유튜브 반려: 사유` |
+| E | 올린 뒤 게시 링크 | 링크 3개 한 번에 |
+
+**스크립트 직접** — `tc(){ .venv/bin/python .claude/skills/travel-content/scripts/tc.py "$@"; }`
+```bash
+tc init --work work/C-003_가우도 --id C-003 --place 가우도
+tc insta-pick --work work/C-003_가우도 --src examples/가우도
+tc insta-use --work work/C-003_가우도 --dir insta_pick
+tc insta-cover --work work/C-003_가우도 --photo 3 --region 전남,강진 --title 가우도
+tc insta-order --work work/C-003_가우도 --order 3,1,2,4,6,5
+# content.json에 캡션·대본·블로그 글 작성 (references/prompts/ 참고) 후
+tc build --work work/C-003_가우도 --ch instagram --confirm      # youtube · tistory도 같은 방식
+tc tistory-photos --work work/C-003_가우도 --extra P007
+tc review --work work/C-003_가우도 --stage final
+tc ceo --work work/C-003_가우도 --ch all --approve
+tc publish-all --work work/C-003_가우도 --instagram URL --youtube URL --tistory URL
+tc status --work work/C-003_가우도
+```
+
+## 결과물 확인
+- `work/C-xxx_장소/instagram/vN/` card_*.jpg · caption.txt
+- `work/C-xxx_장소/youtube/vN/` shorts.mp4 · voice.m4a · subtitles.srt · script.txt · meta.txt
+- `work/C-xxx_장소/tistory/vN/` post.html · article.md · preview.html · images/
+- 채널 폴더마다 `check.md`(자동 점검) · 작업폴더에 `usage.md`(사진 사용표) · `OUTPUTS.md`(결과물 링크 ✅/❌) · `work/ledger.xlsx`(콘텐츠대장)
+
+## 테스트
+```bash
+.venv/bin/python -m unittest discover -s .claude/skills/travel-content/tests
+```
+
+## 주의사항·문제 해결
+| 상황 | 메시지·증상 | 해결 |
+| --- | --- | --- |
+| 캡션 전에 build | `거절: content.json이 없습니다` | 확인 지점 A부터 |
+| 빈 `insta_mine/` | `… 에 사진이 없습니다` | 사진을 넣고 다시 |
+| 메인 주소를 링크로 | `거절: 게시물 링크가 아닙니다` | 게시물 주소(`/p/…`, `/shorts/…`) |
+| 대표 승인 전 게시 기록 | `거절: 대표 승인 전 채널이 있어…` | D 먼저 |
+| OpenAI 키 없음 | check.md에 "예비 엔진" 경고 | `.env`에 키 저장 후 다시 build |
+| Chrome 확장 미연결 | 업로드 자동 입력 불가 | 업로드 묶음으로 직접 올리기 (공유·발행은 항상 사람) |
+
+- macOS 전용 도구(`sips`, `say`)를 쓴다. 인스타·유튜브 자동 업로드 API는 설정하지 않았다.
+- `gpt-4o-mini-tts`는 OpenAI 문서 기준 2027-01-06 종료 예정.
+- 폰트: Pretendard(OFL), 나눔손글씨 중학생·티몬 몬소리는 jexists/instpic에서 복사 — 티몬 몬소리 라이선스 원문 확인 필요.
+- 확장 계획(구현 안 됨): 1단계 **tripfolio**(AI 코딩 기반 시스템으로 확장할 때의 서비스 이름) → 2단계 식당·물건 리뷰 등 다른 주제 → 3단계 생성형 이미지로 컨셉까지 만드는 자동 인플루언서 (2·3단계 서비스 이름은 새로 정함).
+
+## 문서
+| 문서 | 내용 |
+| --- | --- |
+| [docs/00_제출문서_구성.md](docs/00_제출문서_구성.md) | 제출물 체크리스트 |
+| [docs/01_과제기준_노션정리.md](docs/01_과제기준_노션정리.md) | 과제 기준 |
+| [docs/02_요구사항.md](docs/02_요구사항.md) | 요구사항·결정 기록 |
+| [docs/03_업무흐름도.md](docs/03_업무흐름도.md) | As-Is·To-Be 프로세스맵 (Draw.io 원본 `docs/diagrams/`) |
+| [docs/04_분석설계.md](docs/04_분석설계.md) | 캔버스·자료 목록·문제 카드·RACI |
+| [HANDOFF.md](HANDOFF.md) | 다음 작업자용 현재 상태 |
+
+그림 다시 만들기: `python3.12 docs/diagrams/build_diagrams.py && bash docs/diagrams/render_png.sh` · 발표 HTML·PDF: `python3 docs/presentation/build.py && bash docs/presentation/export_pdfs.sh`
