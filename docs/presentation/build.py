@@ -42,6 +42,46 @@ VARIANTS = {
                      title="travel-content 실행 방법", h1="travel-content<br>실행 방법", sub="설치부터 결과 확인까지 8단계"),
 }
 WHO = "정주애 · 2026.11.11"
+V3_CSS = """
+/* v3: 카드 · 비교 행 · 5칸 흐름 · 완료 카드 */
+.toc-grid { grid-template-columns: repeat(3, 1fr); gap: 0 64px; }
+.cards3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.card { background: var(--card); border: 1.5px solid var(--line); border-radius: 16px; padding: 28px 32px; border-top: 6px solid var(--accent); }
+.card .lb { font: 700 19px var(--font-mono); color: var(--accent); }
+.card .v { font-size: 30px; font-weight: 800; margin-top: 10px; line-height: 1.3; }
+.card .s { font-size: 21px; color: var(--muted); margin-top: 10px; line-height: 1.5; }
+.pick { display: flex; align-items: center; gap: 24px; background: var(--accent-c); border: 2px solid var(--accent); border-radius: 16px; padding: 22px 30px; }
+.pick .t1 { font-size: 30px; font-weight: 800; white-space: nowrap; }
+.pick .why { display: flex; gap: 12px; flex-wrap: wrap; margin-left: auto; }
+.pick .chip b { background: var(--accent); color: var(--on-accent); }
+.cmp { gap: 14px; }
+.cmp .hd, .cmp .rw { display: grid; grid-template-columns: 130px 1fr 72px 1.2fr; align-items: stretch; }
+.cmp .hd { font-size: 26px; font-weight: 800; padding: 0 0 4px; }
+.cmp .hd > div { display: flex; align-items: center; gap: 12px; padding-left: 26px; }
+.cmp .rw { border: 1.5px solid var(--line); border-radius: 14px; background: var(--card); overflow: hidden; min-height: 104px; }
+.cmp .p { font: 800 24px var(--font-mono); color: var(--warn); display: grid; place-items: center; background: var(--card2); border-right: 1.5px solid var(--line); }
+.cmp .a { padding: 0 26px; font-size: 25px; color: var(--muted); display: flex; align-items: center; }
+.cmp .ar { display: grid; place-items: center; }
+.cmp .ar svg { width: 40px; height: 22px; } .cmp .ar path { fill: var(--accent); }
+.cmp .b { padding: 14px 26px; background: var(--accent-c); display: flex; flex-direction: column; justify-content: center; }
+.cmp .b .w { font-size: 27px; font-weight: 800; color: var(--accent-ink); }
+.cmp .b .f { font: 600 18px var(--font-mono); color: var(--muted); margin-top: 6px; }
+.pipe .st { display: flex; flex-direction: column; gap: 12px; padding: 26px 22px; }
+.pipe .no { width: 48px; height: 48px; border-radius: 50%; background: var(--ink); color: var(--bg); font: 800 24px var(--font-mono); display: grid; place-items: center; }
+.pipe .st.hot .no { background: var(--accent); color: var(--on-accent); }
+.pipe .nm2 { font-size: 34px; font-weight: 800; }
+.pipe .d { font-size: 22px; line-height: 1.45; flex: 1; }
+.pipe .eg { font: 600 17px/1.5 var(--font-mono); color: var(--muted); background: var(--card2); border-radius: 8px; padding: 10px 12px; }
+.pipe .who { font-size: 19px; font-weight: 700; color: var(--accent); }
+.pipe .ar { width: 48px; }
+.loopnote { display: flex; align-items: center; gap: 16px; font-size: 23px; color: var(--muted); border: 2px dashed var(--warn); border-radius: 12px; padding: 14px 22px; }
+.done { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+.done .dn { display: flex; gap: 22px; background: var(--card); border: 1.5px solid var(--line); border-radius: 16px; padding: 40px 38px; min-height: 250px; }
+.done .ck { width: 60px; height: 60px; flex: none; border-radius: 50%; background: var(--ok); color: #fff; font-size: 30px; font-weight: 900; display: grid; place-items: center; }
+.done .w { font-size: 34px; font-weight: 800; margin-bottom: 16px; }
+.done .h { font-size: 24px; color: var(--muted); line-height: 1.6; }
+.done .h code { font: 700 21px var(--font-mono); color: var(--accent-ink); }
+"""
 
 
 def tokens(css, block_sel, vals):
@@ -58,7 +98,8 @@ def build(ver=""):
     tpl = TPL.read_text(encoding="utf-8")
     tpl = tokens(tpl, ':root, html[data-theme="light"]', TOKENS_LIGHT)
     tpl = tokens(tpl, 'html[data-theme="dark"]', TOKENS_DARK)
-    tpl = tpl.replace("</style>", EXTRA_CSS + "</style>", 1)
+    tpl = tpl.replace("</style>", EXTRA_CSS + (V3_CSS if ver >= "_v3" else "") + "</style>", 1)
+    ncol = 3 if ver >= "_v3" else 4  # v1·v2는 4열 그대로
     tpl = re.sub(r"<template id=\"opt-[^\"]+\">.*?</template>\s*", "", tpl, flags=re.S)  # 쓰지 않는 선택 조각 제거
     # 내용 장 자리 표시 1장을 지운다 (목차 장 다음 ~ </main>)
     toc_end = tpl.index("</section>", tpl.index('data-title="목차"')) + len("</section>")
@@ -69,7 +110,7 @@ def build(ver=""):
     blocks = re.findall(r"(<section class=\"slide\" data-part=\"\w+\".*?</section>)", src, flags=re.S)
     for name, v in VARIANTS.items():
         v = dict(v)
-        if ver == "_v2" and name == "run.html":
+        if ver in ("_v2", "_v3") and name == "run.html":
             v["sub"] = "스킬 zip 하나로 3단계 · Mac·Windows"
         chosen = [b for p, b in zip(slides, blocks) if v["parts"] is None or p in v["parts"]]
         html = head + "\n\n" + "\n\n".join(chosen) + "\n\n" + tail
@@ -80,9 +121,10 @@ def build(ver=""):
                     .replace("{{한 줄 설명 — 명사형}}", v["sub"]).replace("{{발표자}} · {{YYYY.MM.DD}}", WHO))
         # 목차: 섹션을 순서대로 왼쪽 열부터 채운다 (원래 템플릿은 가장 가벼운 열에 넣어 순서가 섞였음)
         html = html.replace("const k = load.indexOf(Math.min(...load));  // 가장 가벼운 열에\n        cols[k].appendChild(g); load[k] += items.length + 1;",
-                            "const size = items.length + 1; if (c < 3 && load[c] > 0 && load[c] + size / 2 > per) c += 1;\n        cols[c].appendChild(g); load[c] += size;")
-        html = html.replace("const cols = [0, 1, 2].map(", "const cols = [0, 1, 2, 3].map(")
-        html = html.replace("const load = [0, 0, 0];", "const load = [0, 0, 0, 0]; let c = 0; const per = [...groups].reduce((a, [, it]) => a + it.length + 1, 0) / 4;")
+                            "const size = items.length + 1; if (c < NCOL - 1 && load[c] > 0 && load[c] + size / 2 > per) c += 1;\n        cols[c].appendChild(g); load[c] += size;")
+        html = html.replace("const cols = [0, 1, 2].map(", f"const cols = {list(range(ncol))}.map(")
+        html = html.replace("const load = [0, 0, 0];", f"const load = {[0] * ncol}; let c = 0; const per = [...groups].reduce((a, [, it]) => a + it.length + 1, 0) / {ncol};")
+        html = html.replace("NCOL - 1", str(ncol - 1))
         if v["parts"] is not None:  # 부분판은 목차 번호가 달라지므로 kicker의 섹션 번호를 뺀다
             html = re.sub(r'<div class="kicker">\d\d · ', '<div class="kicker">', html)
         html = html.replace("</body>", "<script>if(navigator.webdriver)document.querySelectorAll('.theme-pick,.keyhint').forEach(e=>e.style.display='none')</script>\n</body>", 1)

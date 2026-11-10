@@ -3,7 +3,7 @@
 여행 사진 폴더와 장소 이름을 넣으면 **인스타그램 카드뉴스 → 유튜브 숏폼 → 티스토리 블로그**를 만들고, 승인·버전·게시 링크를 콘텐츠대장(`ledger.xlsx`)에 남기는 Claude Code 스킬이다.
 AX Campus 1기 4회차 개인 과제(1안 · Claude 스킬 + 로컬 파일) · 제출 2026-11-10 · 발표 2026-11-11.
 
-> 발표·제출 문서(최신 v2): [`전체_v2.pdf`](docs/자동화업무소개_전체_v2.pdf) · [`업무분석_개선설계_v2.pdf`](docs/자동화업무소개_업무분석_개선설계_v2.pdf) · [`실행방법_v2.pdf`](docs/자동화업무소개_실행방법_v2.pdf) · 발표 HTML [`docs/presentation/index_v2.html`](docs/presentation/index_v2.html) (이전 판은 `_v2` 없는 파일)
+> 발표·제출 문서(최신 v3): [`전체_v3.pdf`](docs/자동화업무소개_전체_v3.pdf) · [`업무분석_개선설계_v3.pdf`](docs/자동화업무소개_업무분석_개선설계_v3.pdf) · [`실행방법_v3.pdf`](docs/자동화업무소개_실행방법_v3.pdf) · 발표 HTML [`docs/presentation/index_v3.html`](docs/presentation/index_v3.html) (이전 판 `_v2`·접미사 없는 파일도 보존)
 
 ## 해결하려는 문제
 | 문제 | 지금(As-Is) | 이 프로젝트 |
@@ -42,7 +42,7 @@ AX Campus 1기 4회차 개인 과제(1안 · Claude 스킬 + 로컬 파일) · �
   scripts/tc.py             명령 모음
   scripts/*.py              insta · render_cards · make_shorts · build_blog · check_rules · review · state · ledger · usage …
   assets/fonts/             Pretendard · 나눔손글씨 중학생 · 티몬 몬소리
-  tests/test_flow.py        unittest 17개
+  tests/test_flow.py        unittest 21개
 examples/가우도/             예제 입력 사진 7장 (GPS·EXIF 제거본)
 dist/travel-content-skill.zip  배포용 스킬 zip (tools/package_skill.py)
 docs/                       분석·설계 문서(00~04) · diagrams/(drawio·svg·png) · presentation/(발표 HTML) · PDF 3개
@@ -130,4 +130,4 @@ tc status --work work/C-003_가우도
 | [docs/04_분석설계.md](docs/04_분석설계.md) | 캔버스·자료 목록·문제 카드·RACI |
 | [HANDOFF.md](HANDOFF.md) | 다음 작업자용 현재 상태 |
 
-그림 다시 만들기: `python3.12 docs/diagrams/build_diagrams.py && bash docs/diagrams/render_png.sh` · 발표 HTML·PDF: `python3 docs/presentation/build.py && bash docs/presentation/export_pdfs.sh` · 스킬 zip: `python3 tools/package_skill.py`
+그림 다시 만들기: `python3.12 docs/diagrams/build_diagrams.py && bash docs/diagrams/render_png.sh` · 실행 방법 그림: `python3 docs/presentation/illust/build_illust.py && bash docs/presentation/illust/render.sh` · 발표 HTML·PDF: `python3 docs/presentation/build.py _v3 && bash docs/presentation/export_pdfs.sh _v3` · 스킬 zip: `python3 tools/package_skill.py`
