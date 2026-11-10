@@ -30,6 +30,7 @@ code { font-family: var(--font-mono); font-size: .9em; }
 .cover .inner { max-width: 1500px; }
 .cover .ctext { display: flex; flex-direction: column; gap: 28px; border-left: 14px solid var(--accent); margin-left: -64px; padding: 6px 0 6px 50px; }
 .cover .keyhint { margin-top: 18px; }
+
 """
 VARIANTS = {
     "index.html": dict(parts=None, kicker="AX Campus 1기 · 4회차 개인 과제",
@@ -72,6 +73,10 @@ def build():
         html = html.replace('<h1 class="r">{{발표 제목}}</h1>', f'<h1 class="r">{v.get("h1", v["title"])}</h1>', 1)
         html = (html.replace("{{발표 제목}}", v["title"]).replace("{{행사·과목 이름}}", v["kicker"])
                     .replace("{{한 줄 설명 — 명사형}}", v["sub"]).replace("{{발표자}} · {{YYYY.MM.DD}}", WHO))
+        # 목차: 섹션을 순서대로 왼쪽 열부터 채운다 (원래 템플릿은 가장 가벼운 열에 넣어 순서가 섞였음)
+        html = html.replace("const k = load.indexOf(Math.min(...load));  // 가장 가벼운 열에\n        cols[k].appendChild(g); load[k] += items.length + 1;",
+                            "const size = items.length + 1; if (c < 2 && load[c] > 0 && load[c] + size / 2 > per) c += 1;\n        cols[c].appendChild(g); load[c] += size;")
+        html = html.replace("const load = [0, 0, 0];", "const load = [0, 0, 0]; let c = 0; const per = [...groups].reduce((a, [, it]) => a + it.length + 1, 0) / 3;")
         if v["parts"] is not None:  # 부분판은 목차 번호가 달라지므로 kicker의 섹션 번호를 뺀다
             html = re.sub(r'<div class="kicker">\d\d · ', '<div class="kicker">', html)
         html = html.replace("</body>", "<script>if(navigator.webdriver)document.querySelectorAll('.theme-pick,.keyhint').forEach(e=>e.style.display='none')</script>\n</body>", 1)

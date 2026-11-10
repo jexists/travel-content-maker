@@ -340,6 +340,7 @@ code { font-family: var(--font-mono); font-size: .9em; }
 .cover .inner { max-width: 1500px; }
 .cover .ctext { display: flex; flex-direction: column; gap: 28px; border-left: 14px solid var(--accent); margin-left: -64px; padding: 6px 0 6px 50px; }
 .cover .keyhint { margin-top: 18px; }
+
 </style>
 </head>
 <body>
@@ -601,7 +602,7 @@ class Deck {
     const grid = document.getElementById('tocGrid');
     if (grid) {
       const cols = [0, 1, 2].map(() => { const c = document.createElement('div'); c.className = 'toc-col'; grid.appendChild(c); return c; });
-      const load = [0, 0, 0];
+      const load = [0, 0, 0]; let c = 0; const per = [...groups].reduce((a, [, it]) => a + it.length + 1, 0) / 3;
       let n = 0;
       for (const [sec, items] of groups) {
         n += 1;
@@ -613,8 +614,8 @@ class Deck {
           b.addEventListener('click', () => this.go(i));
           g.appendChild(b);
         }
-        const k = load.indexOf(Math.min(...load));  // 가장 가벼운 열에
-        cols[k].appendChild(g); load[k] += items.length + 1;
+        const size = items.length + 1; if (c < 2 && load[c] > 0 && load[c] + size / 2 > per) c += 1;
+        cols[c].appendChild(g); load[c] += size;
       }
     }
     const list = document.getElementById('tocList');
