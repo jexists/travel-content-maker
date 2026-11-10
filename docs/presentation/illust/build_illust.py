@@ -181,8 +181,8 @@ def use_claude():
     s.text(316, 174, "Code 탭", size=24, weight=800, fill=ORANGE)
     # 폴더 선택
     s.rect(490, 150, 520, 60, fill="#fff", stroke="#9AA09C", r=10)
-    s.folder(510, 162, "", w=46)
-    s.text(574, 180, "가우도 사진 (사진이 있는 폴더)", size=22, weight=700)
+    s.folder(514, 164, "", w=34)
+    s.text(562, 180, "가우도 사진 (사진이 있는 폴더)", size=22, weight=700)
     s.ring(480, 142, 540, 76)
     s.num(1056, 180, 2)
     s.text(1086, 180, "작업 폴더 = 사진 폴더 선택", size=24, weight=800, fill=ORANGE)
@@ -192,17 +192,80 @@ def use_claude():
     s.text(450, 340, "사진 7장 확인 · 찾은 정보 정리 → A 확인: 사진 순서 · 표지 문구 · 캡션", size=21, fill=MUTED)
     s.text(450, 378, "(이후 B 대본 · C 블로그 · D 대표 승인 · E 링크 순서로 물어봄)", size=19, fill="#8A8F8B")
     # 입력창
-    s.rect(420, 450, 1260, 100, fill="#fff", stroke=TEAL, sw=3, r=16)
-    s.text(450, 500, "이 사진으로 여행 콘텐츠 만들어줘. 장소는 가우도", size=28, weight=800)
-    s.p.append(f'<circle cx="1630" cy="500" r="26" fill="{TEAL}"/>')
-    s.p.append('<path d="M1630 512 v-22 M1620 499 l10 -10 l10 10" fill="none" stroke="#fff" stroke-width="4"/>')
-    s.num(1100, 450, 3)
-    s.text(1130, 432, "한 문장 입력 → 보내기", size=24, weight=800, fill=ORANGE)
+    s.rect(420, 476, 1260, 100, fill="#fff", stroke=TEAL, sw=3, r=16)
+    s.text(450, 526, "이 사진으로 여행 콘텐츠 만들어줘. 장소는 가우도", size=28, weight=800)
+    s.p.append(f'<circle cx="1630" cy="526" r="26" fill="{TEAL}"/>')
+    s.p.append('<path d="M1630 538 v-22 M1620 525 l10 -10 l10 10" fill="none" stroke="#fff" stroke-width="4"/>')
+    s.num(442, 443, 3)
+    s.text(472, 443, "한 문장 입력 → 보내기", size=24, weight=800, fill=ORANGE)
     s.label(1730, 625, "예시 그림 · 앱 화면을 단순화한 그림 (실제 배치와 다를 수 있음)")
     s.save("use_claude")
 
 
+def env_key():
+    """목소리 키: OpenAI 키 만들기 → .env.example 복사해 .env → 키 붙여 넣고 저장."""
+    s = Svg(1760, 610)
+    cols = [(10, 560), (600, 560), (1190, 560)]
+    heads = ["OpenAI 키 만들기", ".env.example → .env 복사", "키 붙여 넣고 저장"]
+    for i, (x, w) in enumerate(cols):
+        s.num(x + 22, 34, i + 1, r=22)
+        s.text(x + 56, 35, heads[i], size=26, weight=800)
+        s.rect(x, 76, w, 470, fill="#fff", stroke=LINE)
+        if i < 2:
+            s.arrow(x + w + 4, 336, cols[i + 1][0] - 6, 336)
+    # ① 브라우저
+    x = 10
+    s.window(x + 24, 100, 512, 330, "")
+    s.rect(x + 110, 108, 340, 28, fill="#fff", stroke=LINE, r=14)
+    s.text(x + 280, 123, "platform.openai.com/api-keys", size=15, fill=MUTED, anchor="middle", mono=True)
+    s.rect(x + 26, 146, 140, 282, fill=SOFT, stroke="none", r=0)
+    for k, t in enumerate(["Playground", "API keys", "Usage", "Billing"]):
+        yy = 180 + k * 46
+        if t == "API keys":
+            s.rect(x + 34, yy - 18, 124, 36, fill=TEAL_C, stroke="none", r=8)
+        s.text(x + 46, yy, t, size=17, weight=800 if t == "API keys" else 500, fill=TEAL if t == "API keys" else MUTED)
+    s.text(x + 190, 180, "API keys", size=24, weight=800)
+    s.rect(x + 190, 214, 320, 46, fill=INK, stroke="none", r=8)
+    s.text(x + 350, 237, "+ Create new secret key", size=18, fill="#fff", weight=700, anchor="middle")
+    s.ring(x + 182, 206, 336, 62)
+    s.rect(x + 190, 300, 320, 46, fill="#fff", stroke="#9AA09C", r=8)
+    s.text(x + 206, 323, "sk-proj-••••••••", size=18, mono=True)
+    s.rect(x + 432, 308, 70, 30, fill=SOFT, stroke="none", r=6)
+    s.text(x + 467, 323, "Copy", size=15, weight=700, anchor="middle")
+    s.text(x + 280, 470, "키 만들기 → 복사 (다시 볼 수 없음)", size=20, weight=700, anchor="middle")
+    s.text(x + 280, 506, "결제 수단 등록 필요 · 쓴 만큼 과금", size=18, fill=MUTED, anchor="middle")
+    # ② 폴더
+    x = 600
+    s.window(x + 24, 100, 512, 330, "travel-content", tint=TEAL_C)
+    files = [("📁", "scripts"), ("📁", "references"), ("·", "SKILL.md"), ("·", ".env.example"), ("·", ".env")]
+    for k, (_, name) in enumerate(files):
+        yy = 168 + k * 50
+        hot = name == ".env"
+        if name.startswith(".env"):
+            s.rect(x + 50, yy - 20, 230, 40, fill=TEAL_C if hot else "#fff", stroke=TEAL if hot else "#9AA09C", sw=2.5 if hot else 1.5, r=8)
+        s.text(x + 66, yy, name, size=20, weight=800 if name.startswith(".env") else 500, mono=name.startswith("."),
+               fill=TEAL if hot else (INK if name.startswith(".") else MUTED))
+    s.curve(f"M{x + 290} {318} C {x + 350} {330}, {x + 350} {360}, {x + 292} {368}")
+    s.text(x + 372, 343, "복사 → 이름 바꾸기", size=18, fill=ORANGE, weight=800)
+    s.text(x + 280, 470, "Mac  Finder에서 ⌘⇧. → 숨김 파일 보기", size=18, weight=600, anchor="middle")
+    s.text(x + 280, 506, "Windows  보기 → 파일 확장명 켜기 (.env.txt 방지)", size=18, weight=600, anchor="middle")
+    # ③ 편집기
+    x = 1190
+    s.window(x + 24, 100, 512, 330, ".env — 텍스트 편집기 / 메모장")
+    s.text(x + 50, 176, "# 숏폼 목소리(OpenAI TTS)용 키", size=17, fill="#8A8F8B", mono=True)
+    s.rect(x + 44, 206, 472, 50, fill=TEAL_C, stroke=TEAL, sw=2.5, r=8)
+    s.text(x + 58, 231, "OPENAI_API_KEY=sk-proj-…", size=21, weight=800, mono=True, fill=TEAL)
+    s.rect(x + 340, 330, 170, 44, fill=INK, stroke="none", r=8)
+    s.text(x + 425, 352, "저장", size=20, fill="#fff", weight=800, anchor="middle")
+    s.ring(x + 332, 322, 186, 60)
+    s.text(x + 280, 470, "= 뒤에 붙여 넣기 → 저장 (⌘S · Ctrl+S)", size=20, weight=700, anchor="middle")
+    s.text(x + 280, 506, "키는 채팅에 붙여 넣지 않기", size=18, fill=ORANGE, weight=700, anchor="middle")
+    s.label(1750, 590, "예시 그림 · 메뉴 이름은 실제 기준, 화면 모양은 단순화 (키 없으면 OS 기본 음성으로 만들어짐)")
+    s.save("env_key")
+
+
 if __name__ == "__main__":
+    env_key()
     win_python()
     put_skill()
     use_claude()

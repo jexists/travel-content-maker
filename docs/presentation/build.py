@@ -69,6 +69,15 @@ img.map { display: block; max-width: 100%; max-height: 800px; width: auto; heigh
 .eff .it .h { font-size: 20px; color: var(--muted); margin-top: 3px; }
 .eff .it .tag { margin-left: auto; font: 700 19px var(--font-mono); color: var(--accent); }
 """
+V5_CSS = """
+/* v5: 목소리 키 안내 · 한계 메모 · 확장 3단계 */
+.keynote { display: flex; align-items: center; gap: 16px; font-size: 23px; color: var(--muted); }
+.later { font-size: 22px; color: var(--muted); border: 2px dashed var(--line); border-radius: 12px; padding: 14px 22px; text-align: center; }
+.flow.grow .st { padding: 40px 36px; min-height: 380px; }
+.flow.grow .st .nm { font-size: 24px; }
+.flow.grow .st .big { font-size: 46px; margin-top: 18px; }
+.flow.grow .st .ex { font-size: 25px; margin-top: 22px; line-height: 1.55; }
+"""
 VARIANTS = {
     "index.html": dict(parts=None, kicker="AX Campus 1기 · 4회차 개인 과제",
                        title="여행 콘텐츠 3채널 자동화", h1="여행 콘텐츠<br>3채널 자동화", sub="사진 폴더 하나로 인스타 카드뉴스 · 유튜브 숏폼 · 티스토리 블로그"),
@@ -134,7 +143,7 @@ def build(ver=""):
     tpl = TPL.read_text(encoding="utf-8")
     tpl = tokens(tpl, ':root, html[data-theme="light"]', TOKENS_LIGHT)
     tpl = tokens(tpl, 'html[data-theme="dark"]', TOKENS_DARK)
-    tpl = tpl.replace("</style>", EXTRA_CSS + (V3_CSS if ver >= "_v3" else "") + (V4_CSS if ver >= "_v4" else "") + "</style>", 1)
+    tpl = tpl.replace("</style>", EXTRA_CSS + (V3_CSS if ver >= "_v3" else "") + (V4_CSS if ver >= "_v4" else "") + (V5_CSS if ver >= "_v5" else "") + "</style>", 1)
     ncol = 3 if ver >= "_v3" else 4  # v1·v2는 4열 그대로
     tpl = re.sub(r"<template id=\"opt-[^\"]+\">.*?</template>\s*", "", tpl, flags=re.S)  # 쓰지 않는 선택 조각 제거
     # 내용 장 자리 표시 1장을 지운다 (목차 장 다음 ~ </main>)
@@ -147,7 +156,7 @@ def build(ver=""):
     for name, v in VARIANTS.items():
         v = dict(v)
         if ver >= "_v2" and name == "run.html":
-            v["sub"] = "스킬 zip 하나로 3단계 · Mac·Windows"
+            v["sub"] = "스킬 zip 하나로 4단계 · Mac·Windows" if ver >= "_v5" else "스킬 zip 하나로 3단계 · Mac·Windows"
         chosen = [b for p, b in zip(slides, blocks) if v["parts"] is None or p in v["parts"]]
         html = head + "\n\n" + "\n\n".join(chosen) + "\n\n" + tail
         html = re.sub(r'(<div class="kicker r">\{\{행사·과목 이름\}\}</div>.*?<div class="who r">.*?</div>)',

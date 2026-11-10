@@ -18,7 +18,7 @@ SECRET = re.compile(rb"sk-[A-Za-z0-9_-]{16,}")
 def main():
     files = [p for p in sorted(SKILL.rglob("*")) if p.is_file()
              and not (set(p.relative_to(SKILL).parts) & SKIP_DIRS) and p.name not in SKIP_FILES]
-    leaks = [str(p.relative_to(SKILL)) for p in files if p.suffix in {".py", ".md", ".json", ".txt"} and SECRET.search(p.read_bytes())]
+    leaks = [str(p.relative_to(SKILL)) for p in files if (p.suffix in {".py", ".md", ".json", ".txt"} or p.name == ".env.example") and SECRET.search(p.read_bytes())]
     if leaks:
         sys.exit(f"키처럼 보이는 문자열이 있어 중단: {leaks}")
     OUT.parent.mkdir(exist_ok=True)

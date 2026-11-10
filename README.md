@@ -3,7 +3,7 @@
 여행 사진 폴더와 장소 이름을 넣으면 **인스타그램 카드뉴스 → 유튜브 숏폼 → 티스토리 블로그**를 만들고, 승인·버전·게시 링크를 콘텐츠대장(`ledger.xlsx`)에 남기는 Claude Code 스킬이다.
 AX Campus 1기 4회차 개인 과제(1안 · Claude 스킬 + 로컬 파일) · 제출 2026-11-10 · 발표 2026-11-11.
 
-> 발표·제출 문서(최신 v4): [`전체_v4.pdf`](docs/자동화업무소개_전체_v4.pdf) · [`업무분석_개선설계_v4.pdf`](docs/자동화업무소개_업무분석_개선설계_v4.pdf) · [`실행방법_v4.pdf`](docs/자동화업무소개_실행방법_v4.pdf) · 발표 HTML [`docs/presentation/index_v4.html`](docs/presentation/index_v4.html) (이전 판 `_v3`·`_v2`·접미사 없는 파일도 보존)
+> 발표·제출 문서(최신 v5): [`전체_v5.pdf`](docs/자동화업무소개_전체_v5.pdf) · [`업무분석_개선설계_v5.pdf`](docs/자동화업무소개_업무분석_개선설계_v5.pdf) · [`실행방법_v5.pdf`](docs/자동화업무소개_실행방법_v5.pdf) · 발표 HTML [`docs/presentation/index_v5.html`](docs/presentation/index_v5.html) (이전 판 `_v4`·`_v3`·`_v2`·접미사 없는 파일도 보존)
 
 ## 해결하려는 문제
 | 문제 | 지금(As-Is) | 이 프로젝트 |
@@ -50,18 +50,19 @@ work/                       실행 결과 (git 제외) — work/C-xxx_장소/, w
 .env.example                OPENAI_API_KEY (선택)
 ```
 
-## 설치 (Mac · Windows, 3단계)
+## 설치 (Mac · Windows, 4단계)
 스킬 zip(`dist/travel-content-skill.zip`, `python3 tools/package_skill.py`로 생성) 하나만 주면 된다. zip 안 [`설치방법.md`](.claude/skills/travel-content/설치방법.md)와 같은 내용.
 
 | 단계 | Mac | Windows |
 | --- | --- | --- |
 | ① 앱 설치 | [Claude 데스크톱 앱](https://claude.ai/download) 로그인(Code 탭) | 같음 |
 | ② 스킬 넣기 | zip을 풀어 `~/.claude/skills/travel-content/` | zip을 풀어 `%USERPROFILE%\.claude\skills\travel-content\` |
-| ③ 쓰기 | 사진 폴더를 Code 탭에서 열고 "이 사진으로 여행 콘텐츠 만들어줘. 장소는 ○○" | 같음 |
+| ③ 목소리 키 | [OpenAI API keys](https://platform.openai.com/api-keys)에서 키 만들기 → 스킬 폴더 `.env.example`을 `.env`로 복사 → `OPENAI_API_KEY=` 뒤에 붙여 넣기 (Finder ⌘⇧. 숨김 파일 보기) | 같음 (탐색기 파일 확장명 켜기, `.env.txt` 주의) |
+| ④ 쓰기 | 사진 폴더를 Code 탭에서 열고 "이 사진으로 여행 콘텐츠 만들어줘. 장소는 ○○" | 같음 |
 
 - Python이 없으면 첫 실행 때 Claude가 설치한다(Windows winget · Mac brew · 둘 다 없으면 uv로 스킬 폴더 `.venv`). 직접 설치하려면 python.org(Windows는 **Add python.exe to PATH** 체크).
 - 처음 실행 때 스킬이 `scripts/setup.py`로 패키지·ffmpeg를 준비한다. 오류가 나면 Claude가 원인을 보고 고친다(SKILL.md "준비 문제 해결"). 사람이 할 일은 앱 설치, 로그인, 명령 실행·권한 승인뿐.
-- 선택: 사진 폴더에 `.env` 파일 → `OPENAI_API_KEY=…` (OpenAI 목소리). 키는 `.env`에만 두고 채팅·zip에 넣지 않는다.
+- ③ 목소리 키: 괜찮은 숏폼 목소리(OpenAI TTS)에 필요. `.env`는 스킬 폴더(모든 사진 폴더에 적용) 또는 작업 폴더에 둔다. OpenAI API는 결제 수단 등록·사용량 과금. 키가 없으면 OS 기본 음성으로 만들어진다. 키는 `.env`에만 두고 채팅·zip에 넣지 않는다.
 - Claude Code는 유료 계정(Pro·Max·Team·Console)이 필요하다.
 
 ## 쓰는 법
@@ -131,4 +132,4 @@ tc status --work work/C-003_가우도
 | [docs/04_분석설계.md](docs/04_분석설계.md) | 캔버스·자료 목록·문제 카드·RACI |
 | [HANDOFF.md](HANDOFF.md) | 다음 작업자용 현재 상태 |
 
-그림 다시 만들기: `python3.12 docs/diagrams/build_diagrams.py && bash docs/diagrams/render_png.sh` · 실행 방법 그림: `python3 docs/presentation/illust/build_illust.py && bash docs/presentation/illust/render.sh` · 발표 HTML·PDF: `python3 docs/presentation/build.py _v4 && bash docs/presentation/export_pdfs.sh _v4` · 스킬 zip: `python3 tools/package_skill.py`
+그림 다시 만들기: `python3.12 docs/diagrams/build_diagrams.py && bash docs/diagrams/render_png.sh` · 실행 방법 그림: `python3 docs/presentation/illust/build_illust.py && bash docs/presentation/illust/render.sh` · 발표 HTML·PDF: `python3 docs/presentation/build.py _v5 && bash docs/presentation/export_pdfs.sh _v5` · 스킬 zip: `python3 tools/package_skill.py`

@@ -68,9 +68,9 @@ def main():
             row(True, "음성", "OpenAI TTS (키 있음)")
         elif local:
             row(True, "음성", {"say": "macOS 기본 음성 (OpenAI 키 없음)", "windows": "Windows 기본 음성 (한국어 음성 필요)"}[local],
-                "더 자연스러운 목소리: 작업 폴더 .env에 OPENAI_API_KEY=… (선택)")
+                "괜찮은 목소리: 스킬 폴더의 .env.example을 .env로 복사하고 OPENAI_API_KEY=… 넣기")
         else:
-            row(False, "음성", "사용할 음성 없음", "작업 폴더 .env에 OPENAI_API_KEY=… 넣기")
+            row(False, "음성", "사용할 음성 없음", "스킬 폴더의 .env.example을 .env로 복사하고 OPENAI_API_KEY=… 넣기")
     except Exception as e:  # 패키지 설치 실패 등
         row(False, "확인", f"{type(e).__name__}: {e}"[:160], "위 패키지 문제를 먼저 해결")
 

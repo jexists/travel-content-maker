@@ -19,7 +19,7 @@ description: 여행 사진 폴더와 여행지 이름을 받아 인스타 카드
 - **파이썬**: Mac `python3`, Windows `python`(없으면 `py -3`). 스킬 폴더에 `.venv`가 있으면 그 안의 python(Mac `.venv/bin/python`, Windows `.venv\Scripts\python.exe`)을 쓴다. 아래 `tc.py`는 `<python> "<SKILL_DIR>/scripts/tc.py"`의 줄임.
 - **처음 한 번 준비**: `<python> "<SKILL_DIR>/scripts/setup.py"` — 패키지(Pillow·openpyxl·pillow-heif·static-ffmpeg) 설치, ffmpeg·ffprobe 자동 준비, 폰트·음성 확인. ❌ 줄이 나오면 아래 "준비 문제 해결"대로 Claude가 먼저 고친다. 사용자에게 묻지 않는다(사람이 해야 하는 것만 부탁).
 - 작업폴더: **Claude Code를 연 폴더**의 `work/<콘텐츠ID>_<장소>/`. 콘텐츠ID = `work/ledger.xlsx` 마지막 번호 + 1.
-- 목소리: 작업 폴더 `.env`의 `OPENAI_API_KEY`가 있으면 OpenAI TTS, 없으면 Mac `say` / Windows 기본 한국어 음성.
+- 목소리: `.env`의 `OPENAI_API_KEY`(작업 폴더 → 상위 폴더 → 스킬 폴더 순으로 찾음)가 있으면 OpenAI TTS, 없으면 Mac `say` / Windows 기본 한국어 음성. 키가 없으면 B(영상 대본) 전에 한 줄로 알린다: "스킬 폴더의 `.env.example`을 `.env`로 복사해 키를 넣으면 OpenAI 목소리" — 키를 채팅으로 받지 않는다.
 
 ### 준비 문제 해결 (setup.py ❌ 줄)
 | 증상 | Claude가 먼저 할 일 | 사용자에게 부탁 |

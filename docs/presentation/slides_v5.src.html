@@ -1,0 +1,332 @@
+<!-- v5 발표 장 원본. build.py가 template.html에 끼워 index.html(전체)·analysis.html(업무 분석·개선 설계)·run.html(실행 방법)을 만든다.
+     data-part: story·demo(전체만) / intro·asis·tobe·impl·end(전체·분석판) / run(전체·실행판) -->
+
+<section class="slide" data-part="story" data-title="왜 만들었나" data-section="배경">
+  <div class="head"><div><div class="kicker">01 · 배경</div><h2 class="title">사진만 찍고 못 올린 여행</h2></div></div>
+  <div class="body" style="justify-content:center;gap:56px">
+    <p class="bigquote r">여행은 자주, 사진은 많이 — 그런데 <span class="hl">인스타 게시는 1년 넘게 멈춤</span></p>
+    <ul class="bullets r" style="max-width:1500px">
+      <li>귀찮음 · 카드 만들기·글쓰기·영상 편집이 모두 따로</li>
+      <li>목표 · 꾸준한 게시로 여행 인플루언서의 길</li>
+      <li>요즘 유행 · 릴스·숏폼 → 사진·영상만 넣으면 카드뉴스·숏폼·블로그 자동 생성</li>
+    </ul>
+  </div>
+</section>
+
+<section class="slide" data-part="intro" data-title="업무 맥락" data-section="업무 소개">
+  <div class="head"><div><div class="kicker">02 · 업무 소개</div><h2 class="title">여행 콘텐츠 3채널 제작·컨펌 업무</h2></div></div>
+  <div class="body" style="justify-content:center;gap:34px">
+    <div class="cards3 r">
+      <div class="card"><div class="lb">업무</div><div class="v">여행 사진 → 3채널 콘텐츠</div><div class="s">인스타 카드뉴스 · 유튜브 숏폼 · 티스토리 글 제작 · 승인 · 게시</div></div>
+      <div class="card"><div class="lb">담당자</div><div class="v">에디터 · 대표</div><div class="s">에디터 = 본인(실제)<br>대표 = 가상 역할 · 배포 직전 승인</div></div>
+      <div class="card"><div class="lb">바꾸는 범위</div><div class="v">사진 추리기 ~ 링크 기록</div><div class="s">협찬 · 댓글 DM · KPI 분석은 제외</div></div>
+    </div>
+    <div class="flow r">
+      <div class="st"><div class="nm">시작</div><div class="big">사진 폴더 + 장소</div><div class="ex">휴대폰 사진첩에서 꺼낸 여행 사진</div></div>
+      <div class="ar"><svg viewBox="0 0 44 24"><path d="M0,10 H32 V2 L44,12 L32,22 V14 H0 Z"/></svg></div>
+      <div class="st"><div class="nm">지금 쓰는 도구</div><div class="big">5가지를 오가며</div><div class="ex">사진첩 · 지도/검색 · 인스타 앱 · 티스토리 에디터 · 메신저</div></div>
+      <div class="ar"><svg viewBox="0 0 44 24"><path d="M0,10 H32 V2 L44,12 L32,22 V14 H0 Z"/></svg></div>
+      <div class="st"><div class="nm">끝</div><div class="big">게시 링크 + 대장</div><div class="ex">3채널 링크를 콘텐츠대장에 기록</div></div>
+    </div>
+    <div class="pick r"><span class="badge b-acc">선택안</span><b class="t1">1안 · Claude 스킬 + 로컬 파일</b>
+      <div class="why"><span class="chip"><b>1</b>사진·영상이 로컬 파일</span><span class="chip"><b>2</b>하루 안에 구현</span><span class="chip"><b>3</b>추가 비용은 TTS뿐</span></div></div>
+  </div>
+</section>
+
+<section class="slide" data-part="intro" data-title="한눈에 보기" data-section="업무 소개">
+  <div class="head"><div><div class="kicker">02 · 업무 소개</div><h2 class="title">사진 폴더 하나로 3채널</h2></div></div>
+  <div class="body" style="justify-content:center;gap:56px">
+    <p class="lead r" style="color:var(--ink);font-weight:700">입력은 사진과 장소, 사람은 확인 지점 5번만 답함</p>
+    <div class="flow r">
+      <div class="st"><div class="nm">입력</div><div class="big">사진 폴더</div><div class="ex">+ 여행지 이름</div></div>
+      <div class="ar"><svg viewBox="0 0 44 24"><path d="M0,10 H32 V2 L44,12 L32,22 V14 H0 Z"/></svg></div>
+      <div class="st hot"><div class="nm">AI + 스크립트</div><div class="big">브리프 · 제작 · 점검</div><div class="ex">확인 지점 A~E</div></div>
+      <div class="ar"><svg viewBox="0 0 44 24"><path d="M0,10 H32 V2 L44,12 L32,22 V14 H0 Z"/></svg></div>
+      <div class="st"><div class="nm">출력</div><div class="big">카드 · 숏폼 · 블로그</div><div class="ex">+ 콘텐츠대장 ledger.xlsx</div></div>
+    </div>
+    <ul class="bullets r"><li>인스타 첫 장만 표지 디자인 · 숏폼 TTS·자막 · 블로그 글·사진 교차</li><li>버전(v1·v2)·승인·반려 사유를 대장에 자동 기록</li></ul>
+  </div>
+</section>
+
+<section class="slide" data-part="intro" data-title="주요 기능" data-section="업무 소개">
+  <div class="head"><div><div class="kicker">02 · 업무 소개</div><h2 class="title">주요 기능</h2></div></div>
+  <div class="chips-rows body r">
+    <div class="chips-row"><div class="lbl"><b>사진</b><span>insta.py</span></div><div class="list"><span class="chip"><b>1</b>20장 초과 시 AI 20장</span><span class="chip"><b>2</b>GPS·EXIF 제거</span><span class="chip"><b>3</b>번호 시트</span><span class="chip"><b>4</b>내 폴더로 교체</span></div></div>
+    <div class="chips-row"><div class="lbl"><b>인스타</b><span>render_cards</span></div><div class="list"><span class="chip"><b>5</b>첫 장 표지 디자인</span><span class="chip"><b>6</b>2장부터 원본 사진</span><span class="chip"><b>7</b>캡션·해시태그</span></div></div>
+    <div class="chips-row"><div class="lbl"><b>숏폼</b><span>make_shorts</span></div><div class="list"><span class="chip"><b>8</b>OpenAI TTS</span><span class="chip"><b>9</b>자막·훅 문구</span><span class="chip"><b>10</b>줌·전환 9:16</span></div></div>
+    <div class="chips-row"><div class="lbl"><b>블로그</b><span>build_blog</span></div><div class="list"><span class="chip"><b>11</b>글→사진→글</span><span class="chip"><b>12</b>제목 후보 5개</span><span class="chip"><b>13</b>HTML·Markdown</span></div></div>
+    <div class="chips-row"><div class="lbl"><b>관리</b><span>state·ledger</span></div><div class="list"><span class="chip"><b>14</b>규칙 자동 점검</span><span class="chip"><b>15</b>순서 강제·승인</span><span class="chip"><b>16</b>콘텐츠대장</span><span class="chip"><b>17</b>결과물 ✅/❌</span></div></div>
+  </div>
+</section>
+
+<section class="slide" data-part="asis" data-title="As-Is 프로세스맵" data-section="현재 업무 분석">
+  <div class="head"><div><div class="kicker">03 · 현재 업무 분석</div><h2 class="title">As-Is · 채널마다 처음부터 다시</h2></div></div>
+  <div class="body r" style="justify-content:center"><img class="map" src="captures/asis.png" alt="As-Is 스윔레인 프로세스맵"></div>
+</section>
+
+<section class="slide" data-part="asis" data-title="문서·데이터 목록" data-section="현재 업무 분석">
+  <div class="head"><div><div class="kicker">03 · 현재 업무 분석</div><h2 class="title">쓰는 문서·데이터</h2></div></div>
+  <div class="body center-y"><table class="t r" style="font-size:25px">
+    <thead><tr><th style="width:130px">ID</th><th style="width:560px">자료</th><th>위치</th><th style="width:260px">단계</th></tr></thead>
+    <tbody>
+      <tr><td class="k">D1</td><td>원본 사진</td><td>휴대폰 사진첩</td><td>A01~A06</td></tr>
+      <tr><td class="k">D2</td><td>장소 정보</td><td>지도·검색 결과</td><td>A02</td></tr>
+      <tr><td class="k">D3·D4</td><td>인스타 카드 · 캡션·해시태그</td><td>편집 도구 · 인스타 앱</td><td>A03~A05</td></tr>
+      <tr><td class="k">D5</td><td>숏폼 영상·제목·설명</td><td>편집 앱 · 유튜브 스튜디오</td><td>A06~A08</td></tr>
+      <tr><td class="k">D6</td><td>티스토리 글</td><td>티스토리 에디터</td><td>A09~A11</td></tr>
+      <tr><td class="k">D7</td><td>검토 피드백·승인</td><td>메신저</td><td>A04~A12</td></tr>
+      <tr><td class="k">D8</td><td>게시 링크</td><td>정리하지 않음</td><td>A13</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section class="slide" data-part="asis" data-title="단계별 문제" data-section="현재 업무 분석">
+  <div class="head"><div><div class="kicker">03 · 현재 업무 분석</div><h2 class="title">단계별 문제 P1~P6</h2></div></div>
+  <div class="body center-y"><table class="t r" style="font-size:26px">
+    <thead><tr><th style="width:130px">문제</th><th style="width:280px">단계</th><th>현상</th></tr></thead>
+    <tbody>
+      <tr><td class="k">P1</td><td>A01·A03</td><td>표지 형식이 정해져 있는데도 카드를 매번 손으로</td></tr>
+      <tr><td class="k">P2</td><td>A02·A09</td><td>같은 장소 정보를 채널마다 다시 찾고 다시 씀</td></tr>
+      <tr><td class="k">P3</td><td>A06</td><td>숏폼 편집 부담 → 유튜브는 아직 시작도 못 함</td></tr>
+      <tr><td class="k">P4</td><td>A04·A07·A10</td><td>어떤 버전이 통과됐는지, 왜 반려됐는지 기록 없음</td></tr>
+      <tr><td class="k">P5</td><td>A05·A08·A11</td><td>해시태그 개수·금지 표현·제목 길이를 눈으로 재확인</td></tr>
+      <tr><td class="k">P6</td><td>A14</td><td>게시 이력·링크가 한곳에 없음</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section class="slide" data-part="tobe" data-title="To-Be 프로세스맵" data-section="개선 설계">
+  <div class="head"><div><div class="kicker">04 · 개선 설계</div><h2 class="title">To-Be · 확인 지점 A~E만 사람이</h2></div></div>
+  <div class="body r" style="justify-content:center"><img class="map" src="captures/tobe.png" alt="To-Be 스윔레인 프로세스맵"></div>
+</section>
+
+<section class="slide" data-part="tobe" data-title="As-Is vs To-Be" data-section="개선 설계">
+  <div class="head"><div><div class="kicker">04 · 개선 설계</div><h2 class="title">무엇이 바뀌나</h2></div></div>
+  <div class="body cmp r" style="justify-content:center">
+      <div class="hd"><div></div><div><span class="badge b-warn">As-Is</span> 사람이 전부</div><div></div><div><span class="badge b-acc">To-Be</span> 사람은 확인만</div></div>
+      <div class="rw"><div class="p">P1</div><div class="a">카드를 매번 손으로</div><div class="ar"><svg viewBox="0 0 44 24"><path d="M0,10 H32 V2 L44,12 L32,22 V14 H0 Z"/></svg></div><div class="b"><div class="w">표지 템플릿 자동</div><div class="f">render_cards · 첫 장만 글자</div></div></div>
+      <div class="rw"><div class="p">P2</div><div class="a">채널마다 정보를 다시 찾고 씀</div><div class="ar"><svg viewBox="0 0 44 24"><path d="M0,10 H32 V2 L44,12 L32,22 V14 H0 Z"/></svg></div><div class="b"><div class="w">브리프 하나로 3채널</div><div class="f">content.json · 사진·검색·메모</div></div></div>
+      <div class="rw"><div class="p">P3</div><div class="a">숏폼 편집 부담 → 시작 못 함</div><div class="ar"><svg viewBox="0 0 44 24"><path d="M0,10 H32 V2 L44,12 L32,22 V14 H0 Z"/></svg></div><div class="b"><div class="w">숏폼 자동 생성</div><div class="f">make_shorts · TTS·자막·전환</div></div></div>
+      <div class="rw"><div class="p">P4·P5</div><div class="a">메신저 검토 · 규칙 눈으로</div><div class="ar"><svg viewBox="0 0 44 24"><path d="M0,10 H32 V2 L44,12 L32,22 V14 H0 Z"/></svg></div><div class="b"><div class="w">확인 지점 + 자동 점검</div><div class="f">rules.json · 버전·반려 사유</div></div></div>
+      <div class="rw"><div class="p">P6</div><div class="a">게시 링크가 흩어짐</div><div class="ar"><svg viewBox="0 0 44 24"><path d="M0,10 H32 V2 L44,12 L32,22 V14 H0 Z"/></svg></div><div class="b"><div class="w">콘텐츠대장</div><div class="f">ledger.xlsx · 게시 링크까지</div></div></div>
+  </div>
+</section>
+
+<section class="slide" data-part="tobe" data-title="AI·시스템·사람 역할" data-section="개선 설계">
+  <div class="head"><div><div class="kicker">04 · 개선 설계</div><h2 class="title">AI · 시스템 · 사람 역할</h2></div></div>
+  <div class="body center-y"><table class="t r" style="font-size:24px">
+    <thead><tr><th style="width:300px">담당</th><th>하는 일</th><th style="width:420px">하지 않는 일</th></tr></thead>
+    <tbody>
+      <tr><td class="k">AI · Claude 스킬</td><td>사진 20장 추리기 · 표지·순서 제안 · 정보 검색(출처) · 캡션·대본·블로그 글</td><td>승인 대신 결정 · 확인 안 된 사실 확정</td></tr>
+      <tr><td class="k">시스템 · tc.py</td><td>GPS 제거 복사 · 카드·숏폼·HTML 생성 · 규칙 점검 · 순서 강제 · 대장 기록</td><td>점검 실패 결과물로 승인 요청</td></tr>
+      <tr><td class="k">사람 · 에디터</td><td>확인 지점 A·B·C 답 · 공유·발행 버튼 · 링크 입력</td><td>—</td></tr>
+      <tr><td class="k">사람 · 대표(가상)</td><td>D · 세 채널 배포 직전 승인·반려</td><td>—</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section class="slide" data-part="tobe" data-title="입력·처리·기록·운영" data-section="개선 설계">
+  <div class="head"><div><div class="kicker">04 · 개선 설계</div><h2 class="title">사진이 게시 기록이 되기까지</h2></div></div>
+  <div class="body" style="justify-content:center;gap:40px">
+    <div class="flow pipe r">
+      <div class="st"><div class="no">1</div><div class="nm2">입력</div><div class="d">사진 폴더 + 장소 이름</div><div class="eg">가우도 사진 7장 · '가우도'</div><div class="who">사람</div></div>
+      <div class="ar"><svg viewBox="0 0 44 24"><path d="M0,10 H32 V2 L44,12 L32,22 V14 H0 Z"/></svg></div>
+      <div class="st"><div class="no">2</div><div class="nm2">만들기</div><div class="d">AI는 글·대본, 스크립트는 카드·영상·블로그</div><div class="eg">card_01.jpg · shorts.mp4 · post.html</div><div class="who">AI + 스크립트</div></div>
+      <div class="ar"><svg viewBox="0 0 44 24"><path d="M0,10 H32 V2 L44,12 L32,22 V14 H0 Z"/></svg></div>
+      <div class="st hot"><div class="no">3</div><div class="nm2">확인</div><div class="d">사람은 다섯 번만 답</div><div class="eg">A·B·C 에디터 → D 대표 승인</div><div class="who">사람</div></div>
+      <div class="ar"><svg viewBox="0 0 44 24"><path d="M0,10 H32 V2 L44,12 L32,22 V14 H0 Z"/></svg></div>
+      <div class="st"><div class="no">4</div><div class="nm2">저장</div><div class="d">채널별 폴더에 버전으로</div><div class="eg">instagram/v1 · youtube/v1 · tistory/v1</div><div class="who">시스템</div></div>
+      <div class="ar"><svg viewBox="0 0 44 24"><path d="M0,10 H32 V2 L44,12 L32,22 V14 H0 Z"/></svg></div>
+      <div class="st"><div class="no">5</div><div class="nm2">기록</div><div class="d">모든 일을 대장에 한 줄씩</div><div class="eg">ledger.xlsx · 컨펌·승인·링크</div><div class="who">시스템</div></div>
+    </div>
+    <div class="loopnote r"><span class="badge b-warn">되돌림</span>자동 점검(카드 수·해시태그·글자 수·영상 길이) 실패 또는 반려 → 2 만들기로 돌아가 v2 생성</div>
+    <div class="stats r"><div><b style="font-size:28px">비용</b><span>Claude Code 구독 + OpenAI TTS 사용량(선택, 없으면 OS 기본 음성)</span></div><div><b style="font-size:28px">배포·운영</b><span>스킬 zip 하나 · Mac·Windows · 규칙·디자인은 rules.json·settings.json</span></div></div>
+  </div>
+</section>
+
+<section class="slide" data-part="tobe" data-title="시스템 구성" data-section="개선 설계">
+  <div class="head"><div><div class="kicker">04 · 개선 설계</div><h2 class="title">시스템 구성</h2></div></div>
+  <div class="body r" style="justify-content:center"><img class="map" src="captures/architecture_v3.png" alt="시스템 구성도"></div>
+</section>
+
+<section class="slide" data-part="impl" data-title="결과물 · 인스타" data-section="구현물">
+  <div class="head"><div><div class="kicker">05 · 구현물</div><h2 class="title">인스타 · 첫 장만 표지 디자인</h2></div></div>
+  <div class="row body r" style="gap:36px">
+    <div class="col" style="width:560px;flex:none"><div class="fit" style="height:700px"><img src="captures/insta_cover.jpg" alt="인스타 표지 카드"></div><div class="cap"><span class="code">card_01</span>표지 · #전남 #강진 / 가우도</div></div>
+    <div class="col f1"><div class="fit" style="height:440px"><img src="captures/a_insta_sheet.jpg" alt="확인 지점 A 시트"></div><div class="cap"><span class="code">A</span>올라가는 순서 시트 · 1번 = 표지</div>
+      <ul class="bullets" style="margin-top:24px"><li style="font-size:24px">2장부터 원본 사진 · 문구 없음</li><li style="font-size:24px">점검 · 카드 수·해시태그·순서·키워드</li></ul></div>
+  </div>
+</section>
+
+<section class="slide" data-part="impl" data-title="결과물 · 숏폼" data-section="구현물">
+  <div class="head"><div><div class="kicker">05 · 구현물</div><h2 class="title">숏폼 · 대본·TTS·자막 27.5초</h2></div></div>
+  <div class="row body r" style="gap:36px">
+    <div class="col" style="width:400px;flex:none"><div class="fit" style="height:700px"><img src="captures/shorts_hook.jpg" alt="숏폼 첫 장면"></div><div class="cap"><span class="code">hook</span>위쪽 훅 문구 고정</div></div>
+    <div class="col f1"><div class="fit" style="height:430px"><img src="captures/shorts_frames.jpg" alt="숏폼 장면별 프레임"></div><div class="cap"><span class="code">6장면</span>표지 → 안내판 → 포토존 → 조형물 → 청자타워 → 안내도</div>
+      <ul class="bullets" style="margin-top:24px"><li style="font-size:24px">문장 단위 TTS 길이 = 장면 길이</li><li style="font-size:24px">자동 점검 · 1080×1920 · 음성 끝까지 · 자막 안전 영역</li></ul></div>
+  </div>
+</section>
+
+<section class="slide" data-part="impl" data-title="결과물 · 블로그" data-section="구현물">
+  <div class="head"><div><div class="kicker">05 · 구현물</div><h2 class="title">블로그 · 글→사진→글</h2></div></div>
+  <div class="row body r" style="gap:40px">
+    <div class="col" style="width:620px;flex:none"><div class="shot" style="height:740px"><img src="captures/blog_top.png" alt="블로그 미리보기 첫 화면"></div><div class="cap"><span class="code">preview</span>미리보기 첫 화면</div></div>
+    <div class="col f1" style="justify-content:center"><table class="t" style="font-size:23px"><tbody>
+      <tr><td class="k">제목</td><td>강진 가우도 출렁다리 건너 섬 한 바퀴 코스 후기</td></tr>
+      <tr><td class="k">분량</td><td>본문 1,594자 (기준 1,500자 이상)</td></tr>
+      <tr><td class="k">키워드</td><td>'강진 가우도' 5회 (기준 5~7회)</td></tr>
+      <tr><td class="k">사진</td><td>7장 · 고른 순서 그대로 · 연속 최대 1장</td></tr>
+      <tr><td class="k">출력</td><td>post.html · article.md · preview.html</td></tr>
+    </tbody></table></div>
+  </div>
+</section>
+
+<section class="slide" data-part="impl" data-title="콘텐츠대장" data-section="구현물">
+  <div class="head"><div><div class="kicker">05 · 구현물</div><h2 class="title">콘텐츠대장 · 모든 사건 기록</h2></div></div>
+  <div class="body" style="gap:28px"><table class="t r" style="font-size:21px">
+    <thead><tr><th style="width:130px">기록ID</th><th style="width:280px">일시</th><th style="width:160px">채널</th><th style="width:90px">버전</th><th style="width:240px">사건</th><th>담당·메모</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">L-0016</td><td>2026-11-10 00:16</td><td>instagram</td><td>—</td><td>인스타 사진 후보</td><td>시스템 · 원본 7장 → 후보 7장</td></tr>
+      <tr><td class="mono">L-0019</td><td>2026-11-10 00:42</td><td>instagram</td><td>v1</td><td>점검 통과</td><td>시스템</td></tr>
+      <tr><td class="mono">L-0020</td><td>2026-11-10 00:43</td><td>instagram</td><td>v1</td><td>컨펌</td><td>에디터</td></tr>
+      <tr><td class="mono">L-0021</td><td>2026-11-10 00:43</td><td>instagram</td><td>v1</td><td>대표 승인</td><td>대표</td></tr>
+      <tr><td class="mono">L-0023</td><td>2026-11-10 00:48</td><td>youtube</td><td>v1</td><td>점검 통과</td><td>시스템</td></tr>
+      <tr><td class="mono">L-0029</td><td>2026-11-10 00:55</td><td>tistory</td><td>v1</td><td>대표 승인</td><td>대표</td></tr>
+    </tbody></table>
+    <div class="stats r"><div><b>29</b><span>대장 행 (C-001 14 · C-002 15)</span></div><div><b>21</b><span>자동 테스트 통과</span></div><div><b>3</b><span>채널 대표 승인 (C-002)</span></div></div>
+  </div>
+</section>
+
+<section class="slide" data-part="impl" data-title="과제 완료" data-section="구현물">
+  <div class="head"><div><div class="kicker">05 · 구현물</div><h2 class="title">과제 완료</h2></div></div>
+  <div class="body" style="justify-content:center;gap:32px">
+    <div class="done r">
+      <div class="dn"><div class="ck">✓</div><div><div class="w">시작 · 처리 · 끝이 명확</div><div class="h"><code>state.json</code> 상태 머신 — 사진 폴더 → A~E → 게시 기록</div><div class="h">순서를 건너뛰면 <code>tc.py</code>가 거절 (대표 승인 전 게시 기록 등)</div></div></div>
+      <div class="dn"><div class="ck">✓</div><div><div class="w">실제 입력으로 결과 생성 · 저장</div><div class="h">가우도 사진 7장 → 카드 7장 · 숏폼 27.5초 MP4 · 블로그 1,594자</div><div class="h"><code>work/C-002_가우도/{채널}/v1/</code> + <code>OUTPUTS.md</code> ✅</div></div></div>
+      <div class="dn"><div class="ck">✓</div><div><div class="w">다시 실행해도 기록 보존</div><div class="h"><code>ledger.xlsx</code> 추가 전용 · (ID·채널·버전·사건) 중복 차단</div><div class="h"><code>vN/</code> 폴더 버전 보존 · 대장 29행 (C-001 14 · C-002 15)</div></div></div>
+      <div class="dn"><div class="ck">✓</div><div><div class="w">누구나 실행 · 남은 문제 구분</div><div class="h">스킬 zip → 새 가상환경 설치 재현 · <code>setup.py</code>가 ffmpeg 자동 준비</div><div class="h">단위 테스트 21개 통과 · 한계는 마무리 장에 분리</div></div></div>
+    </div>
+    <div class="stats r"><div><b>21</b><span>단위 테스트 통과</span></div><div><b>29</b><span>콘텐츠대장 행</span></div><div><b>3</b><span>채널 대표 승인 (C-002)</span></div><div><b>35</b><span>배포 zip 파일 · 비밀값 0</span></div></div>
+  </div>
+</section>
+
+<section class="slide" data-part="run" data-title="① Claude 앱 설치" data-section="실행 방법">
+  <div class="head"><div><div class="kicker">06 · 실행 방법</div><h2 class="title">① 앱 설치 — Claude 앱 하나</h2></div></div>
+  <div class="body r" style="align-items:center;justify-content:center;gap:18px">
+    <div class="shot" style="width:1400px"><img src="illust/mark_claude_download.png" alt="claude.ai/download"></div>
+    <div class="cap" style="font-size:24px"><span class="code" style="font-size:19px">claude.ai/download</span>설치 → 로그인 → Code 탭 (Pro·Max·Team 등 유료 계정)</div>
+  </div>
+</section>
+
+<section class="slide" data-part="run" data-title="② 스킬 넣기" data-section="실행 방법">
+  <div class="head"><div><div class="kicker">06 · 실행 방법</div><h2 class="title">② 스킬 넣기 — zip 풀어서 skills 폴더로</h2></div></div>
+  <div class="body r" style="justify-content:center"><div class="fit" style="height:780px;border:0"><img src="illust/put_skill.png" alt="스킬 넣기 예시 그림"></div></div>
+</section>
+
+<section class="slide" data-part="run" data-title="③ 목소리 키 넣기" data-section="실행 방법">
+  <div class="head"><div><div class="kicker">06 · 실행 방법</div><h2 class="title">③ 목소리 키 넣기 — 괜찮은 숏폼 목소리</h2></div></div>
+  <div class="body r" style="justify-content:center;gap:24px"><div class="fit" style="height:640px;border:0"><img src="illust/env_key.png" alt="OpenAI 키를 .env에 넣는 예시 그림"></div>
+    <div class="keynote"><span class="badge b-acc">한 번만</span><code>.env</code>는 스킬 폴더에 두면 모든 사진 폴더에 적용 · 같은 문장은 저장해 두어 다시 과금하지 않음</div></div>
+</section>
+
+<section class="slide" data-part="run" data-title="④ 쓰기" data-section="실행 방법">
+  <div class="head"><div><div class="kicker">06 · 실행 방법</div><h2 class="title">④ 쓰기 — 사진 폴더 열고 한 문장</h2></div></div>
+  <div class="body r" style="justify-content:center;align-items:center"><img class="map" src="illust/use_claude.png" alt="Claude 앱 Code 탭 예시 그림" style="max-height:780px"></div>
+</section>
+
+<section class="slide" data-part="run" data-title="첫 실행 자동 준비" data-section="실행 방법">
+  <div class="head"><div><div class="kicker">06 · 실행 방법</div><h2 class="title">나머지는 스킬이 알아서</h2></div></div>
+  <div class="row body r" style="gap:44px;align-items:center">
+    <div class="term" style="width:960px;flex:none">
+      <div class="bar"><i></i><i></i><i></i><span>setup.py · 새로 푼 스킬 + 스킬 폴더 .env (실제 출력)</span></div>
+<pre><span class="pr">$</span> <span class="cm">python3 travel-content/scripts/setup.py</span>
+<span class="hd">travel-content 준비 확인</span>
+✅ Python: 3.12.8 · Darwin
+✅ 패키지: <span class="dim">설치함: Pillow>=10, openpyxl>=3.1,</span>
+          <span class="dim">pillow-heif>=0.16, static-ffmpeg>=2.5</span>
+✅ ffmpeg·ffprobe: <span class="dim">/usr/local/bin/ffmpeg</span>
+✅ 폰트: 4개
+✅ 음성: OpenAI TTS <span class="dim">(키 있음)</span>
+
+<span class="done">준비 완료</span></pre>
+    </div>
+    <div class="col f1 fixes">
+      <div class="fh">문제가 나면 → Claude가 먼저 고침</div>
+        <div class="fx"><div class="p">Python 없음</div><div class="ar"><svg viewBox="0 0 44 24"><path d="M0,10 H32 V2 L44,12 L32,22 V14 H0 Z"/></svg></div><div class="s">Claude가 설치 · winget / brew / uv</div></div>
+        <div class="fx"><div class="p">패키지 설치 실패</div><div class="ar"><svg viewBox="0 0 44 24"><path d="M0,10 H32 V2 L44,12 L32,22 V14 H0 Z"/></svg></div><div class="s">스킬 폴더에 .venv 만들어 다시</div></div>
+        <div class="fx"><div class="p">ffmpeg 다운로드 막힘</div><div class="ar"><svg viewBox="0 0 44 24"><path d="M0,10 H32 V2 L44,12 L32,22 V14 H0 Z"/></svg></div><div class="s">brew · winget으로 설치</div></div>
+        <div class="fx"><div class="p">목소리 키 없음</div><div class="ar"><svg viewBox="0 0 44 24"><path d="M0,10 H32 V2 L44,12 L32,22 V14 H0 Z"/></svg></div><div class="s">OS 기본 음성으로 만들고 알림</div></div>
+        <div class="fx me"><div class="p">사람이 할 일</div><div class="ar"><svg viewBox="0 0 44 24"><path d="M0,10 H32 V2 L44,12 L32,22 V14 H0 Z"/></svg></div><div class="s">앱 설치 · 로그인 · 실행 승인</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-part="run" data-title="답하기 · 결과" data-section="실행 방법">
+  <div class="head"><div><div class="kicker">06 · 실행 방법</div><h2 class="title">다섯 번 답하면 생기는 것</h2></div></div>
+  <div class="row body r" style="gap:40px">
+    <div class="col" style="width:760px;flex:none;justify-content:center"><table class="t" style="font-size:23px">
+      <thead><tr><th style="width:80px">지점</th><th>보는 것</th><th style="width:270px">답 예시</th></tr></thead>
+      <tbody>
+        <tr><td class="k">A</td><td>사진 순서 · 표지 · 캡션</td><td>이대로 / 내가 고를게</td></tr>
+        <tr><td class="k">B</td><td>영상 제목 · 대본</td><td>이대로 / 고칠 문장</td></tr>
+        <tr><td class="k">C</td><td>블로그 제목 5개</td><td>2번 제목으로 이대로</td></tr>
+        <tr><td class="k">D</td><td>세 채널 체크리스트</td><td>대표 승인 전부</td></tr>
+        <tr><td class="k">E</td><td>올린 뒤 링크</td><td>링크 3개 한 번에</td></tr>
+      </tbody></table>
+      <div class="cap" style="margin-top:18px"><span class="code">결과</span>사진 폴더/work/C-001_장소/ · OUTPUTS.md에서 한 번에 열기</div></div>
+    <div class="row f1" style="gap:20px;align-items:flex-start">
+      <div class="col f1"><div class="fit" style="height:560px"><img src="captures/insta_cover.jpg" alt="인스타 표지"></div><div class="cap"><span class="code">instagram/v1</span>카드 · 캡션</div></div>
+      <div class="col f1"><div class="fit" style="height:560px"><img src="captures/shorts_hook.jpg" alt="숏폼 첫 장면"></div><div class="cap"><span class="code">youtube/v1</span>shorts.mp4</div></div>
+      <div class="col f1"><div class="fit" style="height:560px"><img src="captures/blog_top.png" alt="블로그 미리보기"></div><div class="cap"><span class="code">tistory/v1</span>preview.html</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-part="demo" data-title="시연 순서" data-section="시연">
+  <div class="head"><div><div class="kicker">07 · 시연</div><h2 class="title">시연 순서 — 입력부터 기록까지</h2></div></div>
+  <div class="body center-y" style="gap:36px">
+    <div class="steps r">
+      <div class="s"><div class="no">01</div><div class="w">스킬 넣고 요청</div><div class="h">zip → skills 폴더 · 한 문장</div></div>
+      <div class="s"><div class="no">02</div><div class="w">A 카드</div><div class="h">순서 시트·표지·캡션</div></div>
+      <div class="s"><div class="no">03</div><div class="w">B 대본 → 숏폼</div><div class="h">shorts.mp4 재생</div></div>
+      <div class="s"><div class="no">04</div><div class="w">C 블로그</div><div class="h">preview.html</div></div>
+    </div>
+    <div class="steps r">
+      <div class="s"><div class="no">05</div><div class="w">D 체크리스트</div><div class="h">대표 승인 전부</div></div>
+      <div class="s"><div class="no">06</div><div class="w">결과 폴더</div><div class="h">OUTPUTS.md 열기</div></div>
+      <div class="s"><div class="no">07</div><div class="w">콘텐츠대장</div><div class="h">ledger.xlsx 새 행</div></div>
+      <div class="s"><div class="no">08</div><div class="w">이력 보존</div><div class="h">C-001·C-002 행 그대로</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-part="end" data-title="기대 효과와 한계" data-section="마무리">
+  <div class="head"><div><div class="kicker">08 · 마무리</div><h2 class="title">기대 효과와 현재 한계</h2></div></div>
+  <div class="body eff r" style="align-content:center">
+    <div class="side"><div class="colh"><span class="badge b-acc">효과</span>사진만 찍던 여행이 콘텐츠로</div>
+        <div class="it"><div class="ic ok">✓</div><div><div class="w">멈췄던 인스타 다시</div><div class="h">사진 폴더만 넣으면 카드뉴스 · 캡션</div></div></div>
+        <div class="it"><div class="ic ok">✓</div><div><div class="w">릴스 · 숏폼까지</div><div class="h">사진으로 목소리·자막 숏폼 자동</div></div></div>
+        <div class="it"><div class="ic ok">✓</div><div><div class="w">블로그도 한 번에</div><div class="h">브리프 하나로 3채널</div></div></div>
+        <div class="it"><div class="ic ok">✓</div><div><div class="w">꾸준한 게시</div><div class="h">여행 인플루언서의 길로</div></div></div>
+    </div>
+    <div class="side"><div class="colh"><span class="badge b-warn">한계</span>아직 고칠 곳</div>
+        <div class="it"><div class="ic wn">!</div><div><div class="w">사진 선택 · 영상 대본 · 블로그 내용</div><div class="h">아직 어색한 부분 많음 → 더 자세한 수정 필요</div></div></div>
+        <div class="it"><div class="ic wn">!</div><div><div class="w">토큰 · 시간</div><div class="h">더 아낄 방법 필요</div></div></div>
+        <div class="it"><div class="ic wn">!</div><div><div class="w">잘 쓴 내용의 기준</div><div class="h">검증 필요 · 지금 점검은 형식 규칙 위주</div></div></div>
+      <div class="later">계속 쓰면서 고쳐 갈 예정</div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-part="end" data-title="확장 계획" data-section="마무리">
+  <div class="head"><div><div class="kicker">08 · 마무리</div><h2 class="title">다음 3단계</h2></div></div>
+  <div class="body" style="justify-content:center">
+    <div class="flow grow r">
+      <div class="st hot"><div class="nm">1단계</div><div class="big">tripfolio</div><div class="ex">Claude 스킬 → AI 코딩 기반 시스템(3안)으로 확장할 때의 서비스 이름</div></div>
+      <div class="ar"><svg viewBox="0 0 44 24"><path d="M0,10 H32 V2 L44,12 L32,22 V14 H0 Z"/></svg></div>
+      <div class="st"><div class="nm">2단계</div><div class="big">주제 확장</div><div class="ex">여행 → 식당 · 물건 리뷰 등 다른 주제<br>서비스 이름 새로</div></div>
+      <div class="ar"><svg viewBox="0 0 44 24"><path d="M0,10 H32 V2 L44,12 L32,22 V14 H0 Z"/></svg></div>
+      <div class="st"><div class="nm">3단계</div><div class="big">자동 인플루언서</div><div class="ex">생성형 이미지로 주제 · 컨셉까지 자동<br>서비스 이름 새로</div></div>
+    </div>
+  </div>
+</section>
