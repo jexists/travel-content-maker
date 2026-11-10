@@ -15,8 +15,20 @@ description: 여행 사진 폴더와 여행지 이름을 받아 인스타 카드
 - **하지 않는 것**: 확인 지점 밖에서 묻기, 승인을 대신 결정하기, 브리프에 없는 사실·경험 쓰기, 공유·발행 버튼 누르기, 원본 사진 폴더 수정.
 
 ## 실행 환경
-- 명령: `"$PROJECT/.venv/bin/python" "$SKILL_DIR/scripts/tc.py" <명령> --work <작업폴더> …` (`SKILL_DIR` = 이 파일 폴더, `PROJECT` = `.venv`가 있는 프로젝트 루트). 외부 도구: `ffmpeg`·`ffprobe`, `sips`(HEIC), OpenAI TTS 키(`.env`의 `OPENAI_API_KEY`, 없으면 `say`).
-- 작업폴더: `work/<콘텐츠ID>_<장소>/`. 콘텐츠ID = `work/ledger.xlsx` 마지막 번호 + 1.
+- Mac·Windows 공통. `SKILL_DIR` = 이 파일이 있는 폴더(보통 `~/.claude/skills/travel-content`, Windows `%USERPROFILE%\.claude\skills\travel-content`).
+- **파이썬**: Mac `python3`, Windows `python`(없으면 `py -3`). 스킬 폴더에 `.venv`가 있으면 그 안의 python(Mac `.venv/bin/python`, Windows `.venv\Scripts\python.exe`)을 쓴다. 아래 `tc.py`는 `<python> "<SKILL_DIR>/scripts/tc.py"`의 줄임.
+- **처음 한 번 준비**: `<python> "<SKILL_DIR>/scripts/setup.py"` — 패키지(Pillow·openpyxl·pillow-heif·static-ffmpeg) 설치, ffmpeg·ffprobe 자동 준비, 폰트·음성 확인. ❌ 줄이 나오면 아래 "준비 문제 해결"대로 Claude가 먼저 고친다. 사용자에게 묻지 않는다(사람이 해야 하는 것만 부탁).
+- 작업폴더: **Claude Code를 연 폴더**의 `work/<콘텐츠ID>_<장소>/`. 콘텐츠ID = `work/ledger.xlsx` 마지막 번호 + 1.
+- 목소리: 작업 폴더 `.env`의 `OPENAI_API_KEY`가 있으면 OpenAI TTS, 없으면 Mac `say` / Windows 기본 한국어 음성.
+
+### 준비 문제 해결 (setup.py ❌ 줄)
+| 증상 | Claude가 먼저 할 일 | 사용자에게 부탁 |
+| --- | --- | --- |
+| `python`을 못 찾음 | `python3`·`py -3`로 다시 | 설치돼 있지 않으면 python.org 설치(Windows는 "Add to PATH" 체크) |
+| 패키지 설치 실패(권한·externally-managed) | 스킬 폴더에 `.venv` 만들고 그 python으로 setup.py 다시 | — |
+| ffmpeg 없음(자동 다운로드 막힘) | Mac `brew install ffmpeg` / Windows `winget install Gyan.FFmpeg` 실행 제안 | 관리자 권한 승인 |
+| 음성 없음 | Windows 설정 > 시간 및 언어 > 음성에서 한국어 음성 추가 안내, 또는 OpenAI 키 | `.env`에 키 넣기 |
+| 그 밖 | 오류 원문을 보여 주고 원인·해결 한 줄 | — |
 - 스크립트가 `거절:`로 끝나면 순서·조건 위반이다. 이유를 그대로 전하고 우회하지 않는다.
 - 기본값 `references/settings.json`(표지 디자인, 블로그 배치, 목소리·자막) — 묻지 않는다. 채널 문구 규칙 `references/prompts/`(`common.md` → `instagram.md`·`shorts.md`·`blog.md`·`blog_plog.md`), 확인 지점 규칙 `references/prompts/confirm.md`.
 - **토큰·시간 절약**: 확인 지점마다 카드 1개(`tc.py review --stage …` 출력) + 이미지 1장만 보낸다. 중간 진행은 한 줄로만 알리고, 같은 내용을 다시 설명하지 않는다.

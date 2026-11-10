@@ -129,13 +129,53 @@ def say(text, out, cfg):
         return w.getnframes() / w.getframerate(), w.readframes(w.getnframes())
 
 
+WIN_PS = r"""
+Add-Type -AssemblyName System.Speech
+$s = New-Object System.Speech.Synthesis.SpeechSynthesizer
+$v = $s.GetInstalledVoices() | Where-Object { $_.VoiceInfo.Culture.Name -eq 'ko-KR' } | Select-Object -First 1
+if (-not $v) { exit 3 }
+$s.SelectVoice($v.VoiceInfo.Name)
+$fmt = New-Object System.Speech.AudioFormat.SpeechAudioFormatInfo(24000, [System.Speech.AudioFormat.AudioBitsPerSample]::Sixteen, [System.Speech.AudioFormat.AudioChannel]::Mono)
+$s.SetOutputToWaveFile($env:TC_OUT, $fmt)
+$s.Rate = 1
+$s.Speak((Get-Content -Raw -Encoding UTF8 $env:TC_TXT))
+$s.Dispose()
+"""
+
+
+def win_speech(text, out, cfg):
+    """Windows 기본 음성 (System.Speech, 한국어 음성이 설치돼 있을 때)."""
+    import os
+    txt = Path(str(out) + ".txt")
+    txt.write_text(text, encoding="utf-8")
+    env = {**os.environ, "TC_OUT": str(out), "TC_TXT": str(txt)}
+    r = subprocess.run(["powershell", "-NoProfile", "-Command", WIN_PS], env=env, capture_output=True, text=True)
+    if r.returncode == 3:
+        raise SystemExit("Windows에 한국어 음성이 없습니다. OpenAI 키를 작업 폴더 .env에 넣거나 설정 > 시간 및 언어 > 음성에서 한국어 음성을 추가하세요.")
+    if r.returncode:
+        raise SystemExit(f"Windows 음성 생성 실패: {r.stderr.strip()[:300]}")
+    with wave.open(str(out)) as w:
+        return w.getnframes() / w.getframerate(), w.readframes(w.getnframes())
+
+
+def local_engine():
+    """OpenAI 키가 없을 때 쓸 기본 음성: macOS say / Windows System.Speech / 없음."""
+    import platform
+    import shutil
+    if shutil.which("say"):
+        return "say"
+    if platform.system() == "Windows" and shutil.which("powershell"):
+        return "windows"
+    return None
+
+
 def openai_key():
     """환경변수 OPENAI_API_KEY, 없으면 프로젝트 루트 .env (git에 안 올라감). 키 값은 출력하지 않는다."""
     import os
     k = os.environ.get("OPENAI_API_KEY")
     if k:
         return k.strip()
-    for d in [Path.cwd(), *Path(__file__).resolve().parents]:
+    for d in [Path.cwd(), *Path.cwd().parents, *Path(__file__).resolve().parents]:  # 작업 폴더 .env 우선
         env = d / ".env"
         if env.exists():
             for line in env.read_text(encoding="utf-8").splitlines():
@@ -193,8 +233,13 @@ def tts(text, out, cfg, cache_dir):
         _, data = openai_tts(text, cfg, cache_dir)
         eng = "openai"
     else:
-        _, data = say(text, out, cfg)
-        eng = "say"
+        eng = local_engine()
+        if eng == "say":
+            _, data = say(text, out, cfg)
+        elif eng == "windows":
+            _, data = win_speech(text, out, cfg)
+        else:
+            raise SystemExit("사용할 음성이 없습니다. 작업 폴더 .env에 OPENAI_API_KEY를 넣어 주세요.")
     data = trim_silence(data)
     return eng, len(data) / 2 / RATE, data
 
@@ -393,9 +438,10 @@ def make(scenes, out_dir, meta, cfg, hook_text=None, cache_dir=None):
             if s["tts"] != s["text"]:
                 lines.append(f"  - TTS 발음: {s['tts']}")
         lines.append("")
-    engine = "openai" if engines == {"openai"} else ("say" if engines == {"say"} else "mixed")
-    voice = (f"OpenAI {cfg['openai']['model']} / {cfg['openai']['voice']}" if engine == "openai"
-             else f"macOS say / {cfg['voice']} (속도 {cfg['rate']})")
+    engine = next(iter(engines)) if len(engines) == 1 else "mixed"
+    voice = {"openai": f"OpenAI {cfg['openai']['model']} / {cfg['openai']['voice']}",
+             "say": f"macOS say / {cfg['voice']} (속도 {cfg['rate']})",
+             "windows": "Windows 기본 한국어 음성"}.get(engine, "여러 엔진")
     if hook_text:
         lines.insert(1, f"훅 문구(화면 위 고정): {hook_text}")
     lines.insert(1, f"목소리: {voice}")

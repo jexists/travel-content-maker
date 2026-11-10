@@ -1,5 +1,6 @@
 """공통 경로·JSON·폰트·이미지 유틸."""
 import json
+import shutil
 import subprocess
 from datetime import datetime
 from pathlib import Path
@@ -66,11 +67,33 @@ def open_rgb(path):
 
 
 def heic_to_jpg(src, dst):
+    """HEIC → JPG. pillow-heif(Mac·Windows 공통)를 먼저 쓰고, 없으면 macOS sips."""
     dst.parent.mkdir(parents=True, exist_ok=True)
-    if not dst.exists():
-        subprocess.run(["sips", "-s", "format", "jpeg", str(src), "--out", str(dst)],
-                       check=True, capture_output=True)
-    return dst
+    if dst.exists():
+        return dst
+    try:
+        import pillow_heif
+        pillow_heif.register_heif_opener()
+        Image.open(src).convert("RGB").save(dst, "JPEG", quality=95)
+        return dst
+    except ImportError:
+        pass
+    if shutil.which("sips"):
+        subprocess.run(["sips", "-s", "format", "jpeg", str(src), "--out", str(dst)], check=True, capture_output=True)
+        return dst
+    raise SystemExit("HEIC 사진을 열 수 없습니다. setup.py를 실행해 pillow-heif를 설치하세요.")
+
+
+def ensure_tools():
+    """ffmpeg·ffprobe가 PATH에 없으면 static-ffmpeg(Mac·Windows 자동 다운로드)로 채운다."""
+    if shutil.which("ffmpeg") and shutil.which("ffprobe"):
+        return True
+    try:
+        import static_ffmpeg
+        static_ffmpeg.add_paths()
+    except ImportError:
+        return False
+    return bool(shutil.which("ffmpeg") and shutil.which("ffprobe"))
 
 
 def cover_crop(im, w, h):

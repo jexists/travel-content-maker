@@ -324,4 +324,15 @@ s.edge("s1", "c2", exit="top", entry="bottom", kind="data")
 s.edge("c4", "s2", exit="bottom", entry="top", kind="data")
 s.edge("c5", "s3", exit="bottom", entry="top", kind="data")
 s.build()
+# ================= 시스템 구성도 v2 (Mac·Windows, 스킬 zip) =================
+v = Diagram("architecture_v2", [H, AIL, SC, TOOL, ST], 9)
+for k, n in s.nodes.items():
+    v.nodes[k] = dict(n)
+v.edges, v.badges = list(s.edges), list(s.badges)
+v.nodes["u1"]["label"] = "스킬 zip 넣기\n+ 사진 폴더"
+v.nodes["x1"]["label"] = "Pillow ·\npillow-heif(HEIC)"
+v.nodes["x2"]["label"] = "ffmpeg 자동 준비 ·\nOpenAI TTS"
+v.nodes["x3"]["label"] = "Mac say / Win 음성\n(선택: Chrome)"
+v.nodes["k1"]["label"] = "SKILL.md ·\nsetup.py 첫 준비"
+v.build()
 print("done:", sorted(p.name for p in OUT.iterdir() if p.suffix in (".drawio", ".svg")))

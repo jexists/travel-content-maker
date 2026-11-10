@@ -300,6 +300,8 @@ def cmd_review(a):
 
 
 def main():
+    from common import ensure_tools
+    ensure_tools()  # ffmpeg가 없으면 static-ffmpeg로 (Mac·Windows)
     ap = argparse.ArgumentParser(description="여행 콘텐츠 3채널 제작")
     sub = ap.add_subparsers(dest="cmd", required=True)
     def sp(name, f, *args):

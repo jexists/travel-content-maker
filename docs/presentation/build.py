@@ -1,6 +1,6 @@
 """발표 HTML 3판 만들기 — dev-ppt-maker template.html + slides.src.html
 
-python3 docs/presentation/build.py
+python3 docs/presentation/build.py [_v2]
   index.html     전체 (발표용)
   analysis.html  업무 분석 · 개선 설계 (구현물·한계 포함)
   run.html       실행 방법
@@ -53,7 +53,8 @@ def tokens(css, block_sel, vals):
     return css[:start] + block + css[end:]
 
 
-def build():
+def build(ver=""):
+    """ver="" → slides.src.html → index.html …, ver="_v2" → slides_v2.src.html → index_v2.html …"""
     tpl = TPL.read_text(encoding="utf-8")
     tpl = tokens(tpl, ':root, html[data-theme="light"]', TOKENS_LIGHT)
     tpl = tokens(tpl, 'html[data-theme="dark"]', TOKENS_DARK)
@@ -63,10 +64,13 @@ def build():
     toc_end = tpl.index("</section>", tpl.index('data-title="목차"')) + len("</section>")
     main_end = tpl.index("</main>")
     head, tail = tpl[:toc_end], tpl[main_end:]
-    src = (HERE / "slides.src.html").read_text(encoding="utf-8")
+    src = (HERE / f"slides{ver}.src.html").read_text(encoding="utf-8")
     slides = re.findall(r"<section class=\"slide\" data-part=\"(\w+)\".*?</section>", src, flags=re.S)
     blocks = re.findall(r"(<section class=\"slide\" data-part=\"\w+\".*?</section>)", src, flags=re.S)
     for name, v in VARIANTS.items():
+        v = dict(v)
+        if ver == "_v2" and name == "run.html":
+            v["sub"] = "스킬 zip 하나로 3단계 · Mac·Windows"
         chosen = [b for p, b in zip(slides, blocks) if v["parts"] is None or p in v["parts"]]
         html = head + "\n\n" + "\n\n".join(chosen) + "\n\n" + tail
         html = re.sub(r'(<div class="kicker r">\{\{행사·과목 이름\}\}</div>.*?<div class="who r">.*?</div>)',
@@ -85,9 +89,11 @@ def build():
         left = re.findall(r"\{\{[^}]+\}\}", html)
         if left:
             raise SystemExit(f"{name}: 남은 자리 표시 {left[:5]}")
-        (HERE / name).write_text(html, encoding="utf-8")
-        print(name, len(chosen) + 2, "장")
+        out = name.replace(".html", f"{ver}.html")
+        (HERE / out).write_text(html, encoding="utf-8")
+        print(out, len(chosen) + 2, "장")
 
 
 if __name__ == "__main__":
-    build()
+    import sys
+    build(sys.argv[1] if len(sys.argv) > 1 else "")

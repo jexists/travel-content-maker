@@ -224,5 +224,46 @@ class Rules(unittest.TestCase):
         self.assertEqual((r["cards_min"], r["cards_max"]), (1, 20))
 
 
+class CrossPlatform(unittest.TestCase):
+    """Mac·Windows 공통 처리 (Windows 실제 실행은 이 Mac에서 못 하므로 분기만 확인)."""
+
+    def test_heic_to_jpg_with_pillow_heif(self):
+        import pillow_heif
+        from common import heic_to_jpg
+        tmp = Path(tempfile.mkdtemp())
+        pillow_heif.from_pillow(Image.new("RGB", (64, 48), (10, 120, 200))).save(tmp / "a.heic")
+        out = heic_to_jpg(tmp / "a.heic", tmp / "c" / "a.jpg")
+        self.assertEqual(Image.open(out).size, (64, 48))
+
+    def test_local_engine_by_os(self):
+        from unittest import mock
+        import make_shorts
+        with mock.patch("shutil.which", lambda n: "/usr/bin/say" if n == "say" else None):
+            self.assertEqual(make_shorts.local_engine(), "say")
+        with mock.patch("shutil.which", lambda n: "C:/ps.exe" if n == "powershell" else None), \
+             mock.patch("platform.system", lambda: "Windows"):
+            self.assertEqual(make_shorts.local_engine(), "windows")
+        with mock.patch("shutil.which", lambda n: None), mock.patch("platform.system", lambda: "Linux"):
+            self.assertIsNone(make_shorts.local_engine())
+
+    def test_no_voice_refuses(self):
+        from unittest import mock
+        import make_shorts
+        with mock.patch.object(make_shorts, "openai_key", lambda: None), \
+             mock.patch.object(make_shorts, "local_engine", lambda: None):
+            with self.assertRaises(SystemExit) as e:
+                make_shorts.tts("안녕", Path(tempfile.mkdtemp()) / "x.wav", {"engine": "openai"}, tempfile.mkdtemp())
+            self.assertIn("OPENAI_API_KEY", str(e.exception))
+
+    def test_ensure_tools_uses_static_ffmpeg(self):
+        from unittest import mock
+        import common
+        calls = []
+        fake = type("M", (), {"add_paths": staticmethod(lambda: calls.append(1))})
+        with mock.patch("shutil.which", lambda n: None), mock.patch.dict(sys.modules, {"static_ffmpeg": fake}):
+            common.ensure_tools()
+        self.assertEqual(calls, [1])
+
+
 if __name__ == "__main__":
     unittest.main()
