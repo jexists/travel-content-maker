@@ -1,7 +1,7 @@
 # HANDOFF — 여행 콘텐츠 제작 자동화 (AX Campus 4회차 개인 과제)
 
 > 갱신 2026-11-10 · **마감 2026-11-10(화) 23:59 제출 · 2026-11-11(수) 발표·시연**
-> 저장소: github.com/jexists/travel-content-maker (비공개, main)
+> 저장소: github.com/jexists/travel-content-maker (공개, main) · 발표 웹: https://jexists.github.io/travel-content-maker/presentation/index_v5.html (GitHub Pages, main 브랜치 `docs/` 폴더)
 
 ## 1. 사용자와 정한 것
 - 답변은 한국어. 사용자는 질문을 줄이길 원함 → 스킬도 **확인 지점 A~E 다섯 번**만 묻는다.

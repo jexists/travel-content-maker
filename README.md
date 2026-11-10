@@ -3,7 +3,9 @@
 여행 사진 폴더와 장소 이름을 넣으면 **인스타그램 카드뉴스 → 유튜브 숏폼 → 티스토리 블로그**를 만들고, 승인·버전·게시 링크를 콘텐츠대장(`ledger.xlsx`)에 남기는 Claude Code 스킬이다.
 AX Campus 1기 4회차 개인 과제(1안 · Claude 스킬 + 로컬 파일) · 제출 2026-11-10 · 발표 2026-11-11.
 
-> **발표·제출 문서** — [전체 (발표)](docs/여행%20콘텐츠%20제작%20자동화.pdf) · [업무 분석·개선 설계](docs/자동화업무소개_업무분석_개선설계.pdf) · [실행 방법](docs/자동화업무소개_실행방법.pdf) · [발표 HTML](docs/presentation/index_v5.html) · [스킬 zip](dist/travel-content-skill.zip)
+> **발표·제출 문서** — [전체 (발표)](docs/여행%20콘텐츠%20제작%20자동화.pdf) · [업무 분석·개선 설계](docs/자동화업무소개_업무분석_개선설계.pdf) · [실행 방법](docs/자동화업무소개_실행방법.pdf) · [스킬 zip](dist/travel-content-skill.zip)
+>
+> **발표 바로 보기 (웹)** — [전체 발표](https://jexists.github.io/travel-content-maker/presentation/index_v5.html) · [업무 분석·개선 설계](https://jexists.github.io/travel-content-maker/presentation/analysis_v5.html) · [실행 방법](https://jexists.github.io/travel-content-maker/presentation/run_v5.html) (← → 키로 넘기기, T 목차)
 
 ## 해결하려는 문제
 | 문제 | 지금(As-Is) | 이 프로젝트 |
