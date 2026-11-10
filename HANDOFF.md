@@ -15,7 +15,7 @@
 - 확장 계획(발표 마지막 장): 1단계 tripfolio(AI 코딩 기반 시스템) → 2단계 식당·물건 리뷰 등 다른 주제 → 3단계 생성형 이미지로 컨셉까지 자동 인플루언서(2·3단계 이름 새로). 한계: 사진 선택·대본·블로그 아직 어색, 토큰·시간 절약, 잘 쓴 내용 검증 기준.
 
 - 배포(2026-11-10 추가): 스킬 zip(`dist/travel-content-skill.zip`)을 받아 skills 폴더에 넣는 3단계, Mac·Windows 공통. 첫 실행 때 `scripts/setup.py`가 패키지·ffmpeg(static-ffmpeg)·음성을 준비하고, 오류는 Claude가 SKILL.md "준비 문제 해결" 표대로 처리. Windows 실제 실행은 미검증.
-- v5(2026-11-10): 실행 방법 4단계(① 앱 ② 스킬 ③ 목소리 키 `.env` ④ 쓰기), 스킬 zip에 `.env.example` 포함(스킬 폴더 `.env`로 OpenAI TTS 확인), 효과·한계는 사용자 문장대로, 마지막 장은 확장 3단계만.
+- v5(2026-11-10): 마지막에 감사합니다 표지(목차 제외). 공용 dev-ppt-maker template.html이 12:08에 바뀌어 v5 HTML은 바뀌기 전 결과에 표지만 끼워 넣음 — build.py로 다시 만들면 새 템플릿 모양이 됨. 실행 방법 4단계(① 앱 ② 스킬 ③ 목소리 키 `.env` ④ 쓰기), 스킬 zip에 `.env.example` 포함(스킬 폴더 `.env`로 OpenAI TTS 확인), 효과·한계는 사용자 문장대로, 마지막 장은 확장 3단계만.
 - v4(2026-11-10): 흐름도 그림만(테두리·빈칸 없음), 표 초록 강조 줄 제거, 구성도 가로판(`architecture_v3`), Python은 첫 실행 때 Claude가 설치(winget·brew·uv, SKILL.md 준비 문제 해결), 첫 실행 장 터미널 모양, 효과·한계 카드.
 - 문서·발표는 `_v2`로 새로 만듦(이전 PDF·HTML 보존). 최신은 `_v3`: 목차 3열, 업무 소개 카드, 근거 열 삭제, 개선 설계 비교 행·5칸 흐름, 구성도 크게, "과제 완료" 카드, 실행 방법은 실제 캡처(claude.ai/download·python.org) + 예시 그림(`docs/presentation/illust/`).
 

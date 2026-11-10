@@ -81,9 +81,9 @@ V5_CSS = """
 VARIANTS = {
     "index.html": dict(parts=None, kicker="AX Campus 1기 · 4회차 개인 과제",
                        title="여행 콘텐츠 3채널 자동화", h1="여행 콘텐츠<br>3채널 자동화", sub="사진 폴더 하나로 인스타 카드뉴스 · 유튜브 숏폼 · 티스토리 블로그"),
-    "analysis.html": dict(parts={"intro", "asis", "tobe", "impl", "end"}, kicker="제출물 ①·② · 현재 업무 분석과 개선 설계",
+    "analysis.html": dict(parts={"intro", "asis", "tobe", "impl", "end", "thanks"}, kicker="제출물 ①·② · 현재 업무 분석과 개선 설계",
                           title="여행 콘텐츠 3채널 자동화", h1="여행 콘텐츠<br>3채널 자동화", sub="As-Is 분석 · To-Be 설계 · 구현 결과"),
-    "run.html": dict(parts={"run"}, kicker="제출물 ③ · 실행 방법",
+    "run.html": dict(parts={"run", "thanks"}, kicker="제출물 ③ · 실행 방법",
                      title="travel-content 실행 방법", h1="travel-content<br>실행 방법", sub="설치부터 결과 확인까지 8단계"),
 }
 WHO = "정주애 · 2026.11.11"
@@ -151,8 +151,8 @@ def build(ver=""):
     main_end = tpl.index("</main>")
     head, tail = tpl[:toc_end], tpl[main_end:]
     src = (HERE / f"slides{ver}.src.html").read_text(encoding="utf-8")
-    slides = re.findall(r"<section class=\"slide\" data-part=\"(\w+)\".*?</section>", src, flags=re.S)
-    blocks = re.findall(r"(<section class=\"slide\" data-part=\"\w+\".*?</section>)", src, flags=re.S)
+    slides = re.findall(r"<section class=\"slide[^\"]*\" data-part=\"(\w+)\".*?</section>", src, flags=re.S)
+    blocks = re.findall(r"(<section class=\"slide[^\"]*\" data-part=\"\w+\".*?</section>)", src, flags=re.S)
     for name, v in VARIANTS.items():
         v = dict(v)
         if ver >= "_v2" and name == "run.html":
