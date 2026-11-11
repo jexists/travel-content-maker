@@ -128,6 +128,10 @@ h2.title { font-size: 54px; line-height: 1.15; font-weight: 800; letter-spacing:
 
 .panel { background: var(--card); border: 1.5px solid var(--line); border-radius: 14px; padding: 32px 36px; }
 .panel.tint { background: var(--card2); }
+/* 배경색 강조는 기본으로 쓰지 않는다. 장 하나에 한 곳, 정말 핵심일 때만 .fill을 더한다 */
+.hot.fill, .panel.fill { background: var(--accent-c); }
+table.t tr.hot.fill td { background: var(--accent-c); }
+.erd .node.hot.fill rect { fill: var(--accent-c); }
 .badge { display: inline-flex; align-items: center; font: 700 17px var(--font-mono); padding: 5px 12px; border-radius: 999px; border: 1.5px solid currentColor; white-space: nowrap; }
 .b-ok { color: var(--ok); } .b-err { color: var(--err); } .b-info { color: var(--info); } .b-warn { color: var(--warn); } .b-acc { color: var(--accent); }
 
@@ -137,7 +141,8 @@ table.t th { text-align: left; font-size: 19px; font-weight: 700; color: var(--s
 table.t td { padding: 17px 20px; border-bottom: 1px solid var(--line); vertical-align: top; line-height: 1.4; }
 table.t td.k { font-weight: 700; white-space: nowrap; }
 table.t td.q { color: var(--muted); }
-table.t tr.hot td { background: var(--accent-c); }
+table.t tr.hot td { font-weight: 700; }
+table.t tr.hot td:first-child { color: var(--accent-ink); box-shadow: inset 4px 0 0 var(--accent); }
 
 /* 캡처 — 너비에 맞추고 위쪽부터 보여 줌 (상자 높이를 넘는 아래는 잘림) */
 .shot { border: 1.5px solid var(--shot-line); border-radius: 12px; overflow: hidden; background: #fff; }
@@ -148,12 +153,29 @@ table.t tr.hot td { background: var(--accent-c); }
 .cap b { font-weight: 700; }
 .cap .code { font: 700 16px var(--font-mono); color: var(--accent); margin-right: 6px; }
 
+/* 캡처 통째로 — 상자 크기에 맞춰 잘리지 않게 (세로로 긴 화면, 비율이 제각각인 이미지) */
+.fit { border: 1.5px solid var(--shot-line); border-radius: 14px; overflow: hidden; background: #fff; display: flex; align-items: center; justify-content: center; }
+.fit img { width: 100%; height: 100%; object-fit: contain; display: block; }
+
+/* 터미널 화면 — 실행 방법·명령 결과. 테마와 상관없이 어두운 화면 */
+.term { background: #111418; border: 1.5px solid #2b313c; border-radius: 14px; overflow: hidden; }
+html[data-theme="dark"] .term { background: #05070a; border-color: #3a414d; }  /* 어두운 바탕과 구분 */
+.term .tbar { display: flex; align-items: center; gap: 9px; padding: 14px 18px; background: #1d2228; }
+.term .tbar i { width: 14px; height: 14px; border-radius: 50%; background: #5c636e; display: block; }
+.term .tbar span { margin-left: 14px; font: 600 17px var(--font-mono); color: #8b949e; }
+.term pre { margin: 0; padding: 26px 30px 30px; font: 500 22px/1.6 var(--font-mono); color: #e6edf3; white-space: pre; overflow: hidden; }
+.term .pr { color: #7ee2b8; font-weight: 700; }   /* 프롬프트 $ */
+.term .cm { color: #fff; font-weight: 700; }      /* 입력한 명령 */
+.term .dim { color: #8b949e; }                    /* 출력·주석 */
+.term .ok { color: #7ee2b8; font-weight: 700; }   /* 성공 줄 */
+.term .wn { color: #e3b341; }                     /* 주의 줄 */
+
 /* ===========================================
    관계도·ERD SVG — 칼럼 없이 관계만. 색은 토큰을 따른다
    =========================================== */
 .erd { width: 100%; height: 100%; display: block; }
 .erd .node rect { fill: var(--card); stroke: var(--node-line); stroke-width: 2.5; }
-.erd .node.hot rect { stroke: var(--accent); stroke-width: 4; fill: var(--accent-c); }
+.erd .node.hot rect { stroke: var(--accent); stroke-width: 4; }
 .erd .tname { font: 700 25px var(--font-mono); fill: var(--ink); }
 .erd .tko { font-size: 21px; fill: var(--muted); }
 .erd .edge { fill: none; stroke: var(--edge); stroke-width: 2.6; }
@@ -168,7 +190,8 @@ table.t tr.hot td { background: var(--accent-c); }
    =========================================== */
 .arch { position: relative; flex: 1; }
 .arch .box { position: absolute; background: var(--card); border: 2.5px solid var(--node-line); border-radius: 16px; padding: 24px 28px; }
-.arch .box.hot { border-color: var(--accent); background: var(--accent-c); }
+.arch .box.hot { border-color: var(--accent); }
+.arch .box.hot h4 { color: var(--accent-ink); }
 .arch .box h4 { font-size: 30px; font-weight: 800; }
 .arch .box .t { font: 500 18px var(--font-mono); color: var(--muted); margin-top: 4px; }
 .arch .box .d { font-size: 21px; color: var(--muted); margin-top: 12px; line-height: 1.45; }
@@ -182,7 +205,8 @@ table.t tr.hot td { background: var(--accent-c); }
 /* 흐름 (단계 → 단계) */
 .flow { display: flex; align-items: stretch; }
 .flow .st { flex: 1; background: var(--card); border: 2px solid var(--node-line); border-radius: 14px; padding: 22px 24px; }
-.flow .st.hot { border-color: var(--accent); background: var(--accent-c); }
+.flow .st.hot { border-color: var(--accent); }
+.flow .st.hot .big { color: var(--accent-ink); }
 .flow .st .nm { font: 700 20px var(--font-mono); color: var(--muted); }
 .flow .st .big { font-size: 30px; font-weight: 800; margin-top: 6px; }
 .flow .st .ex { font-size: 21px; color: var(--muted); margin-top: 8px; line-height: 1.4; }
@@ -218,7 +242,8 @@ table.t tr.hot td { background: var(--accent-c); }
 .chips-rows { display: flex; flex-direction: column; justify-content: center; }
 .chips-row { display: grid; grid-template-columns: 220px 1fr; gap: 24px; align-items: center; padding: 18px 16px; border-bottom: 1px solid var(--line); }
 .chips-row:first-child { border-top: 2px solid var(--ink); }
-.chips-row.hot { background: var(--accent-c); }
+.chips-row.hot { box-shadow: inset 5px 0 0 var(--accent); }
+.chips-row.hot .lbl b { color: var(--accent-ink); }
 .chips-row .lbl b { font: 800 30px var(--font-mono); display: block; }
 .chips-row .lbl span { font-size: 20px; color: var(--muted); }
 .chips-row .list { display: flex; flex-wrap: wrap; gap: 10px 12px; }
@@ -235,14 +260,14 @@ table.t tr.hot td { background: var(--accent-c); }
 .deco-art { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
 .deco-art .glow { position: absolute; width: 900px; height: 900px; border-radius: 50%; left: calc(var(--gx, 1500px) - 450px); top: calc(var(--gy, 760px) - 450px); background: radial-gradient(circle, var(--glow) 0%, transparent 65%); transition: left .6s ease-out, top .6s ease-out; }
 .slide.deco .inner, .slide.deco .grid3, .slide.deco > p { position: relative; z-index: 1; }
-.slide.deco .bar, .slide.deco .apps { z-index: 1; }   /* 이 둘은 absolute 배치라 position을 덮어쓰지 않는다 */
+.slide.deco .apps { z-index: 1; }   /* absolute 배치라 position을 덮어쓰지 않는다 */
 
 /* ===========================================
    표지
    =========================================== */
 .cover { justify-content: center; }
-.cover .bar { position: absolute; left: 120px; top: 50%; transform: translateY(-62%); width: 14px; height: 330px; background: var(--accent); }
 .cover .inner { padding-left: 64px; display: flex; flex-direction: column; gap: 28px; max-width: 1080px; }
+.cover .ctext { display: flex; flex-direction: column; gap: 28px; border-left: 14px solid var(--accent); margin-left: -64px; padding: 6px 0 6px 50px; }  /* 강조 선이 kicker~발표자를 글 높이만큼 감쌈 */
 .cover h1 { font-size: 112px; line-height: 1.05; font-weight: 800; letter-spacing: -.035em; }
 .cover .sub { font-size: 32px; color: var(--muted); }
 .cover .who { font: 500 24px var(--font-mono); color: var(--muted); margin-top: 10px; }
@@ -256,7 +281,7 @@ table.t tr.hot td { background: var(--accent-c); }
 .theme-pick { display: inline-flex; border: 2px solid var(--ink); border-radius: 999px; overflow: hidden; width: max-content; margin-top: 18px; }
 .theme-pick button { font: 700 22px var(--font-body); padding: 12px 28px; background: transparent; color: var(--ink); border: 0; cursor: pointer; }
 .theme-pick button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
-.keyhint { font-size: 19px; color: var(--subtle); margin-top: 6px; }
+.keyhint { font-size: 19px; color: var(--subtle); margin-top: 18px; }
 
 /* ===========================================
    목차 장 (JS가 data-section으로 채움)
@@ -312,7 +337,12 @@ table.t tr.hot td { background: var(--accent-c); }
 #bar button { width: 38px; height: 38px; border-radius: 999px; border: 0; background: transparent; color: inherit; cursor: pointer; display: grid; place-items: center; }
 #bar button:hover { background: var(--card2); }
 #bar svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-#bar .count { font: 500 14px var(--font-mono); padding: 0 8px; min-width: 76px; text-align: center; }
+#bar:focus-within { opacity: 1; }
+#bar .count { width: auto; min-width: 76px; padding: 0 8px; font: 500 14px var(--font-mono); text-align: center; }
+#bar .jump { display: none; align-items: center; gap: 6px; padding: 0 6px; font: 500 14px var(--font-mono); }
+#bar.jumping .count { display: none; }
+#bar.jumping .jump { display: flex; }
+#bar .jump input { width: 44px; height: 30px; text-align: center; font: 700 14px var(--font-mono); color: var(--ink); background: var(--bg); border: 1.5px solid var(--accent); border-radius: 8px; outline: none; }
 body.on-demo #bar { display: none; }
 #toc { position: fixed; inset: 0; z-index: 40; background: rgba(0,0,0,.55); display: none; align-items: center; justify-content: center; }
 #toc.open { display: flex; }
@@ -326,8 +356,6 @@ body.on-demo #bar { display: none; }
 #toc li button:hover { background: var(--card2); }
 
 /* travel-content 추가 */
-.fit { background: #fff; border: 1.5px solid var(--shot-line); border-radius: 14px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-.fit img { width: 100%; height: 100%; object-fit: contain; display: block; }
 .need-cap { border: 3px dashed var(--subtle); border-radius: 14px; background: var(--card2); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; text-align: center; padding: 30px; color: var(--muted); }
 .need-cap b { font-size: 30px; color: var(--ink); }
 .need-cap span { font-size: 22px; line-height: 1.5; }
@@ -335,16 +363,12 @@ pre.code-out { font: 500 22px/1.55 var(--font-mono); background: var(--card2); b
 ol.nums { padding-left: 34px; display: flex; flex-direction: column; gap: 10px; font-size: 25px; }
 ol.nums li::marker { font-family: var(--font-mono); color: var(--accent); font-weight: 700; }
 code { font-family: var(--font-mono); font-size: .9em; }
-/* 표지: 초록 막대가 kicker~발표자까지 감싸도록, 버튼·안내 간격 */
-.cover .bar { display: none; }
 .cover .inner { max-width: 1500px; }
-.cover .ctext { display: flex; flex-direction: column; gap: 28px; border-left: 14px solid var(--accent); margin-left: -64px; padding: 6px 0 6px 50px; }
-.cover .keyhint { margin-top: 18px; }
-.toc-grid { grid-template-columns: repeat(4, 1fr); gap: 0 44px; }
+.toc-grid { gap: 0 44px; }  /* 열 수는 DECK.tocCols */
 
 
 /* v3: 카드 · 비교 행 · 5칸 흐름 · 완료 카드 */
-.toc-grid { grid-template-columns: repeat(3, 1fr); gap: 0 64px; }
+.toc-grid { gap: 0 64px; }
 .cards3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
 .card { background: var(--card); border: 1.5px solid var(--line); border-radius: 16px; padding: 28px 32px; border-top: 6px solid var(--accent); }
 .card .lb { font: 700 19px var(--font-mono); color: var(--accent); }
@@ -437,13 +461,14 @@ img.map { display: block; max-width: 100%; max-height: 800px; width: auto; heigh
      QR은 빌드 때 SVG로 만들어 SVG 자리 표시에 tools/inline_svg.py로 넣는다 (실행 중 외부 라이브러리 없음). -->
 <section class="slide cover deco" data-title="표지">
   <div class="deco-art" aria-hidden="true"><div class="glow"></div></div>
-  <div class="bar"></div>
   <div class="inner">
-    <div class="ctext"><div class="kicker r">제출물 ①·② · 현재 업무 분석과 개선 설계</div>
-    <h1 class="r">여행 콘텐츠<br>3채널 자동화</h1>
-    <p class="sub r">As-Is 분석 · To-Be 설계 · 구현 결과</p>
-    <div class="who r">정주애 · 2026.11.11</div></div>
-    <div class="r">
+    <div class="ctext">
+      <div class="kicker r">제출물 ①·② · 현재 업무 분석과 개선 설계</div>
+      <h1 class="r">여행 콘텐츠<br>3채널 자동화</h1>
+      <p class="sub r">As-Is 분석 · To-Be 설계 · 구현 결과</p>
+      <div class="who r">정주애 · 2026.11.11</div>
+    </div>
+    <div class="r" style="margin-top:18px">
       <div class="theme-pick" role="group" aria-label="화면 모드">
         <button type="button" data-theme-set="light">라이트</button>
         <button type="button" data-theme-set="dark">다크</button>
@@ -460,7 +485,7 @@ img.map { display: block; max-width: 100%; max-height: 800px; width: auto; heigh
 </section>
 
 <section class="slide" data-part="intro" data-title="업무 맥락" data-section="업무 소개">
-  <div class="head"><div><div class="kicker">업무 소개</div><h2 class="title">여행 콘텐츠 3채널 제작·컨펌 업무</h2></div></div>
+  <div class="head"><div><div class="kicker">02 · 업무 소개</div><h2 class="title">여행 콘텐츠 3채널 제작·컨펌 업무</h2></div></div>
   <div class="body" style="justify-content:center;gap:34px">
     <div class="cards3 r">
       <div class="card"><div class="lb">업무</div><div class="v">여행 사진 → 3채널 콘텐츠</div><div class="s">인스타 카드뉴스 · 유튜브 숏폼 · 티스토리 글 제작 · 승인 · 게시</div></div>
@@ -480,7 +505,7 @@ img.map { display: block; max-width: 100%; max-height: 800px; width: auto; heigh
 </section>
 
 <section class="slide" data-part="intro" data-title="한눈에 보기" data-section="업무 소개">
-  <div class="head"><div><div class="kicker">업무 소개</div><h2 class="title">사진 폴더 하나로 3채널</h2></div></div>
+  <div class="head"><div><div class="kicker">02 · 업무 소개</div><h2 class="title">사진 폴더 하나로 3채널</h2></div></div>
   <div class="body" style="justify-content:center;gap:56px">
     <p class="lead r" style="color:var(--ink);font-weight:700">입력은 사진과 장소, 사람은 확인 지점 5번만 답함</p>
     <div class="flow r">
@@ -495,23 +520,23 @@ img.map { display: block; max-width: 100%; max-height: 800px; width: auto; heigh
 </section>
 
 <section class="slide" data-part="intro" data-title="주요 기능" data-section="업무 소개">
-  <div class="head"><div><div class="kicker">업무 소개</div><h2 class="title">주요 기능</h2></div></div>
+  <div class="head"><div><div class="kicker">02 · 업무 소개</div><h2 class="title">주요 기능</h2></div></div>
   <div class="chips-rows body r">
     <div class="chips-row"><div class="lbl"><b>사진</b><span>insta.py</span></div><div class="list"><span class="chip"><b>1</b>20장 초과 시 AI 20장</span><span class="chip"><b>2</b>GPS·EXIF 제거</span><span class="chip"><b>3</b>번호 시트</span><span class="chip"><b>4</b>내 폴더로 교체</span></div></div>
     <div class="chips-row"><div class="lbl"><b>인스타</b><span>render_cards</span></div><div class="list"><span class="chip"><b>5</b>첫 장 표지 디자인</span><span class="chip"><b>6</b>2장부터 원본 사진</span><span class="chip"><b>7</b>캡션·해시태그</span></div></div>
-    <div class="chips-row"><div class="lbl"><b>숏폼</b><span>make_shorts</span></div><div class="list"><span class="chip"><b>8</b>OpenAI TTS</span><span class="chip"><b>9</b>자막·훅 문구</span><span class="chip"><b>10</b>줌·전환 9:16</span></div></div>
+    <div class="chips-row"><div class="lbl"><b>숏폼</b><span>make_shorts</span></div><div class="list"><span class="chip"><b>8</b>OpenAI TTS</span><span class="chip"><b>9</b>자막·훅 문구</span><span class="chip"><b>10</b>정사각·흐린 배경 9:16</span></div></div>
     <div class="chips-row"><div class="lbl"><b>블로그</b><span>build_blog</span></div><div class="list"><span class="chip"><b>11</b>글→사진→글</span><span class="chip"><b>12</b>제목 후보 5개</span><span class="chip"><b>13</b>HTML·Markdown</span></div></div>
     <div class="chips-row"><div class="lbl"><b>관리</b><span>state·ledger</span></div><div class="list"><span class="chip"><b>14</b>규칙 자동 점검</span><span class="chip"><b>15</b>순서 강제·승인</span><span class="chip"><b>16</b>콘텐츠대장</span><span class="chip"><b>17</b>결과물 ✅/❌</span></div></div>
   </div>
 </section>
 
 <section class="slide" data-part="asis" data-title="As-Is 프로세스맵" data-section="현재 업무 분석">
-  <div class="head"><div><div class="kicker">현재 업무 분석</div><h2 class="title">As-Is · 채널마다 처음부터 다시</h2></div></div>
+  <div class="head"><div><div class="kicker">03 · 현재 업무 분석</div><h2 class="title">As-Is · 채널마다 처음부터 다시</h2></div></div>
   <div class="body r" style="justify-content:center"><img class="map" src="captures/asis.png" alt="As-Is 스윔레인 프로세스맵"></div>
 </section>
 
 <section class="slide" data-part="asis" data-title="문서·데이터 목록" data-section="현재 업무 분석">
-  <div class="head"><div><div class="kicker">현재 업무 분석</div><h2 class="title">쓰는 문서·데이터</h2></div></div>
+  <div class="head"><div><div class="kicker">03 · 현재 업무 분석</div><h2 class="title">쓰는 문서·데이터</h2></div></div>
   <div class="body center-y"><table class="t r" style="font-size:25px">
     <thead><tr><th style="width:130px">ID</th><th style="width:560px">자료</th><th>위치</th><th style="width:260px">단계</th></tr></thead>
     <tbody>
@@ -527,7 +552,7 @@ img.map { display: block; max-width: 100%; max-height: 800px; width: auto; heigh
 </section>
 
 <section class="slide" data-part="asis" data-title="단계별 문제" data-section="현재 업무 분석">
-  <div class="head"><div><div class="kicker">현재 업무 분석</div><h2 class="title">단계별 문제 P1~P6</h2></div></div>
+  <div class="head"><div><div class="kicker">03 · 현재 업무 분석</div><h2 class="title">단계별 문제 P1~P6</h2></div></div>
   <div class="body center-y"><table class="t r" style="font-size:26px">
     <thead><tr><th style="width:130px">문제</th><th style="width:280px">단계</th><th>현상</th></tr></thead>
     <tbody>
@@ -542,12 +567,12 @@ img.map { display: block; max-width: 100%; max-height: 800px; width: auto; heigh
 </section>
 
 <section class="slide" data-part="tobe" data-title="To-Be 프로세스맵" data-section="개선 설계">
-  <div class="head"><div><div class="kicker">개선 설계</div><h2 class="title">To-Be · 확인 지점 A~E만 사람이</h2></div></div>
+  <div class="head"><div><div class="kicker">04 · 개선 설계</div><h2 class="title">To-Be · 확인 지점 A~E만 사람이</h2></div></div>
   <div class="body r" style="justify-content:center"><img class="map" src="captures/tobe.png" alt="To-Be 스윔레인 프로세스맵"></div>
 </section>
 
 <section class="slide" data-part="tobe" data-title="As-Is vs To-Be" data-section="개선 설계">
-  <div class="head"><div><div class="kicker">개선 설계</div><h2 class="title">무엇이 바뀌나</h2></div></div>
+  <div class="head"><div><div class="kicker">04 · 개선 설계</div><h2 class="title">무엇이 바뀌나</h2></div></div>
   <div class="body cmp r" style="justify-content:center">
       <div class="hd"><div></div><div><span class="badge b-warn">As-Is</span> 사람이 전부</div><div></div><div><span class="badge b-acc">To-Be</span> 사람은 확인만</div></div>
       <div class="rw"><div class="p">P1</div><div class="a">카드를 매번 손으로</div><div class="ar"><svg viewBox="0 0 44 24"><path d="M0,10 H32 V2 L44,12 L32,22 V14 H0 Z"/></svg></div><div class="b"><div class="w">표지 템플릿 자동</div><div class="f">render_cards · 첫 장만 글자</div></div></div>
@@ -559,7 +584,7 @@ img.map { display: block; max-width: 100%; max-height: 800px; width: auto; heigh
 </section>
 
 <section class="slide" data-part="tobe" data-title="AI·시스템·사람 역할" data-section="개선 설계">
-  <div class="head"><div><div class="kicker">개선 설계</div><h2 class="title">AI · 시스템 · 사람 역할</h2></div></div>
+  <div class="head"><div><div class="kicker">04 · 개선 설계</div><h2 class="title">AI · 시스템 · 사람 역할</h2></div></div>
   <div class="body center-y"><table class="t r" style="font-size:24px">
     <thead><tr><th style="width:300px">담당</th><th>하는 일</th><th style="width:420px">하지 않는 일</th></tr></thead>
     <tbody>
@@ -572,7 +597,7 @@ img.map { display: block; max-width: 100%; max-height: 800px; width: auto; heigh
 </section>
 
 <section class="slide" data-part="tobe" data-title="입력·처리·기록·운영" data-section="개선 설계">
-  <div class="head"><div><div class="kicker">개선 설계</div><h2 class="title">사진이 게시 기록이 되기까지</h2></div></div>
+  <div class="head"><div><div class="kicker">04 · 개선 설계</div><h2 class="title">사진이 게시 기록이 되기까지</h2></div></div>
   <div class="body" style="justify-content:center;gap:40px">
     <div class="flow pipe r">
       <div class="st"><div class="no">1</div><div class="nm2">입력</div><div class="d">사진 폴더 + 장소 이름</div><div class="eg">가우도 사진 7장 · '가우도'</div><div class="who">사람</div></div>
@@ -585,18 +610,18 @@ img.map { display: block; max-width: 100%; max-height: 800px; width: auto; heigh
       <div class="ar"><svg viewBox="0 0 44 24"><path d="M0,10 H32 V2 L44,12 L32,22 V14 H0 Z"/></svg></div>
       <div class="st"><div class="no">5</div><div class="nm2">기록</div><div class="d">모든 일을 대장에 한 줄씩</div><div class="eg">ledger.xlsx · 컨펌·승인·링크</div><div class="who">시스템</div></div>
     </div>
-    <div class="loopnote r"><span class="badge b-warn">되돌림</span>자동 점검(카드 수·해시태그·글자 수·영상 길이) 실패 또는 반려 → 2 만들기로 돌아가 v2 생성</div>
+    <div class="loopnote r"><span class="badge b-warn">되돌림</span>자동 점검(카드 수·해시태그·대본 규칙·글자 수·영상 길이) 실패 또는 반려 → 2 만들기로 돌아가 v2 생성</div>
     <div class="stats r"><div><b style="font-size:28px">비용</b><span>Claude Code 구독 + OpenAI TTS 사용량(선택, 없으면 OS 기본 음성)</span></div><div><b style="font-size:28px">배포·운영</b><span>스킬 zip 하나 · Mac·Windows · 규칙·디자인은 rules.json·settings.json</span></div></div>
   </div>
 </section>
 
 <section class="slide" data-part="tobe" data-title="시스템 구성" data-section="개선 설계">
-  <div class="head"><div><div class="kicker">개선 설계</div><h2 class="title">시스템 구성</h2></div></div>
+  <div class="head"><div><div class="kicker">04 · 개선 설계</div><h2 class="title">시스템 구성</h2></div></div>
   <div class="body r" style="justify-content:center"><img class="map" src="captures/architecture_v3.png" alt="시스템 구성도"></div>
 </section>
 
 <section class="slide" data-part="impl" data-title="결과물 · 인스타" data-section="구현물">
-  <div class="head"><div><div class="kicker">구현물</div><h2 class="title">인스타 · 첫 장만 표지 디자인</h2></div></div>
+  <div class="head"><div><div class="kicker">05 · 구현물</div><h2 class="title">인스타 · 첫 장만 표지 디자인</h2></div></div>
   <div class="row body r" style="gap:36px">
     <div class="col" style="width:560px;flex:none"><div class="fit" style="height:700px"><img src="captures/insta_cover.jpg" alt="인스타 표지 카드"></div><div class="cap"><span class="code">card_01</span>표지 · #전남 #강진 / 가우도</div></div>
     <div class="col f1"><div class="fit" style="height:440px"><img src="captures/a_insta_sheet.jpg" alt="확인 지점 A 시트"></div><div class="cap"><span class="code">A</span>올라가는 순서 시트 · 1번 = 표지</div>
@@ -605,16 +630,16 @@ img.map { display: block; max-width: 100%; max-height: 800px; width: auto; heigh
 </section>
 
 <section class="slide" data-part="impl" data-title="결과물 · 숏폼" data-section="구현물">
-  <div class="head"><div><div class="kicker">구현물</div><h2 class="title">숏폼 · 대본·TTS·자막 27.5초</h2></div></div>
+  <div class="head"><div><div class="kicker">05 · 구현물</div><h2 class="title">숏폼 · 대본·TTS·자막 27.5초</h2></div></div>
   <div class="row body r" style="gap:36px">
-    <div class="col" style="width:400px;flex:none"><div class="fit" style="height:700px"><img src="captures/shorts_hook.jpg" alt="숏폼 첫 장면"></div><div class="cap"><span class="code">hook</span>위쪽 훅 문구 고정</div></div>
-    <div class="col f1"><div class="fit" style="height:430px"><img src="captures/shorts_frames.jpg" alt="숏폼 장면별 프레임"></div><div class="cap"><span class="code">6장면</span>표지 → 안내판 → 포토존 → 조형물 → 청자타워 → 안내도</div>
-      <ul class="bullets" style="margin-top:24px"><li style="font-size:24px">문장 단위 TTS 길이 = 장면 길이</li><li style="font-size:24px">자동 점검 · 1080×1920 · 음성 끝까지 · 자막 안전 영역</li></ul></div>
+    <div class="col" style="width:400px;flex:none"><div class="fit" style="height:700px"><img src="captures/shorts_hook_v5.jpg" alt="숏폼 첫 장면"></div><div class="cap"><span class="code">hook</span>위 띠 훅 문구 · 가운데 사진</div></div>
+    <div class="col f1"><div class="fit" style="height:430px"><img src="captures/shorts_frames_v5.jpg" alt="숏폼 장면별 프레임"></div><div class="cap"><span class="code">6장면</span>표지 → 안내판 → 포토존 → 조형물 → 청자타워 → 안내도</div>
+      <ul class="bullets" style="margin-top:24px"><li style="font-size:24px">정사각 사진 + 위아래 흐린 배경 · 자막은 검은 박스</li><li style="font-size:24px">대본 규칙 먼저 점검 · 해요체 · 문장 35자 · 훅 20자</li><li style="font-size:24px">문장 단위 TTS 길이 = 장면 길이 · 1080×1920 · 자막 안전 영역</li></ul></div>
   </div>
 </section>
 
 <section class="slide" data-part="impl" data-title="결과물 · 블로그" data-section="구현물">
-  <div class="head"><div><div class="kicker">구현물</div><h2 class="title">블로그 · 글→사진→글</h2></div></div>
+  <div class="head"><div><div class="kicker">05 · 구현물</div><h2 class="title">블로그 · 글→사진→글</h2></div></div>
   <div class="row body r" style="gap:40px">
     <div class="col" style="width:620px;flex:none"><div class="shot" style="height:740px"><img src="captures/blog_top.png" alt="블로그 미리보기 첫 화면"></div><div class="cap"><span class="code">preview</span>미리보기 첫 화면</div></div>
     <div class="col f1" style="justify-content:center"><table class="t" style="font-size:23px"><tbody>
@@ -628,7 +653,7 @@ img.map { display: block; max-width: 100%; max-height: 800px; width: auto; heigh
 </section>
 
 <section class="slide" data-part="impl" data-title="콘텐츠대장" data-section="구현물">
-  <div class="head"><div><div class="kicker">구현물</div><h2 class="title">콘텐츠대장 · 모든 사건 기록</h2></div></div>
+  <div class="head"><div><div class="kicker">05 · 구현물</div><h2 class="title">콘텐츠대장 · 모든 사건 기록</h2></div></div>
   <div class="body" style="gap:28px"><table class="t r" style="font-size:21px">
     <thead><tr><th style="width:130px">기록ID</th><th style="width:280px">일시</th><th style="width:160px">채널</th><th style="width:90px">버전</th><th style="width:240px">사건</th><th>담당·메모</th></tr></thead>
     <tbody>
@@ -644,7 +669,7 @@ img.map { display: block; max-width: 100%; max-height: 800px; width: auto; heigh
 </section>
 
 <section class="slide" data-part="impl" data-title="과제 완료" data-section="구현물">
-  <div class="head"><div><div class="kicker">구현물</div><h2 class="title">과제 완료</h2></div></div>
+  <div class="head"><div><div class="kicker">05 · 구현물</div><h2 class="title">과제 완료</h2></div></div>
   <div class="body" style="justify-content:center;gap:32px">
     <div class="done r">
       <div class="dn"><div class="ck">✓</div><div><div class="w">시작 · 처리 · 끝이 명확</div><div class="h"><code>state.json</code> 상태 머신 — 사진 폴더 → A~E → 게시 기록</div><div class="h">순서를 건너뛰면 <code>tc.py</code>가 거절 (대표 승인 전 게시 기록 등)</div></div></div>
@@ -657,7 +682,7 @@ img.map { display: block; max-width: 100%; max-height: 800px; width: auto; heigh
 </section>
 
 <section class="slide" data-part="end" data-title="기대 효과와 한계" data-section="마무리">
-  <div class="head"><div><div class="kicker">마무리</div><h2 class="title">기대 효과와 현재 한계</h2></div></div>
+  <div class="head"><div><div class="kicker">08 · 마무리</div><h2 class="title">기대 효과와 현재 한계</h2></div></div>
   <div class="body eff r" style="align-content:center">
     <div class="side"><div class="colh"><span class="badge b-acc">효과</span>사진만 찍던 여행이 콘텐츠로</div>
         <div class="it"><div class="ic ok">✓</div><div><div class="w">멈췄던 인스타 다시</div><div class="h">사진 폴더만 넣으면 카드뉴스 · 캡션</div></div></div>
@@ -675,7 +700,7 @@ img.map { display: block; max-width: 100%; max-height: 800px; width: auto; heigh
 </section>
 
 <section class="slide" data-part="end" data-title="확장 계획" data-section="마무리">
-  <div class="head"><div><div class="kicker">마무리</div><h2 class="title">다음 3단계</h2></div></div>
+  <div class="head"><div><div class="kicker">08 · 마무리</div><h2 class="title">다음 3단계</h2></div></div>
   <div class="body" style="justify-content:center">
     <div class="flow grow r">
       <div class="st hot"><div class="nm">1단계</div><div class="big">tripfolio</div><div class="ex">Claude 스킬 → AI 코딩 기반 시스템(3안)으로 확장할 때의 서비스 이름</div></div>
@@ -712,7 +737,8 @@ img.map { display: block; max-width: 100%; max-height: 800px; width: auto; heigh
 <!-- 조작 막대 (시연 장에서는 숨기고 머리의 버튼을 씀) -->
 <nav id="bar" aria-label="슬라이드 조작">
   <button type="button" data-act="prev" title="이전 (←)"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
-  <span class="count" id="count">01 / 01</span>
+  <button type="button" class="count" id="count" data-act="jump" title="눌러서 장 번호 입력">01 / 01</button>
+  <label class="jump" title="번호 입력 후 Enter · Esc 취소"><input id="jumpInput" type="text" inputmode="numeric" autocomplete="off" aria-label="이동할 장 번호"><span id="jumpTotal">/ 01</span></label>
   <button type="button" data-act="next" title="다음 (→)"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
   <button type="button" data-act="toc" title="목차 (T)"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></button>
   <button type="button" data-act="theme" title="라이트/다크"><svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
@@ -734,6 +760,8 @@ const DECK = {
     // app1: 'https://…',   // data-demo="app1" 시연 장의 주소
   },
   wakeUrl: '',             // 무료 서버를 미리 깨울 health 주소 (없으면 빈칸)
+  tocCols: 3,              // 목차 장의 열 수 (섹션이 많으면 4)
+  kickerNo: false,          // 장 머리 kicker 앞 번호를 목차 섹션 번호로 맞춤. 일부 장만 뽑은 부분판은 false → 번호를 뺌
 };
 
 /* ===========================================
@@ -792,11 +820,21 @@ class Deck {
       if (!groups.has(sec)) groups.set(sec, []);
       groups.get(sec).push([i, s.dataset.title]);
     });
+    /* 장 머리 kicker "NN · 섹션"의 NN을 목차 섹션 번호로 맞춤 (부분판이면 번호를 뺌) */
+    const secNo = new Map([...groups.keys()].map((sec, k) => [sec, String(k + 1).padStart(2, '0')]));
+    this.slides.forEach((s) => {
+      const k = s.querySelector('.head .kicker'); const sec = s.dataset.section;
+      if (!k || !sec || !/^\s*\d+\s*·\s*/.test(k.textContent)) return;
+      k.textContent = k.textContent.replace(/^\s*\d+\s*·\s*/, DECK.kickerNo === false ? '' : secNo.get(sec) + ' · ');
+    });
     const grid = document.getElementById('tocGrid');
     if (grid) {
-      const cols = [0, 1, 2].map(() => { const c = document.createElement('div'); c.className = 'toc-col'; grid.appendChild(c); return c; });
-      const load = [0, 0, 0]; let c = 0; const per = [...groups].reduce((a, [, it]) => a + it.length + 1, 0) / 3;
-      let n = 0;
+      const N = DECK.tocCols || 3;
+      grid.style.gridTemplateColumns = `repeat(${N}, 1fr)`;
+      const cols = Array.from({ length: N }, () => { const c = document.createElement('div'); c.className = 'toc-col'; grid.appendChild(c); return c; });
+      const per = [...groups.values()].reduce((a, it) => a + it.length + 1, 0) / N;  // 열마다 줄 수가 고르게
+      const load = Array(N).fill(0);
+      let n = 0, c = 0;
       for (const [sec, items] of groups) {
         n += 1;
         const g = document.createElement('div'); g.className = 'toc-group';
@@ -807,7 +845,8 @@ class Deck {
           b.addEventListener('click', () => this.go(i));
           g.appendChild(b);
         }
-        const size = items.length + 1; if (c < 2 && load[c] > 0 && load[c] + size / 2 > per) c += 1;
+        const size = items.length + 1;  // 섹션 순서를 지키며 왼쪽 열부터 채움
+        if (c < N - 1 && load[c] > 0 && load[c] + size / 2 > per) c += 1;
         cols[c].appendChild(g); load[c] += size;
       }
     }
@@ -879,7 +918,31 @@ class Deck {
     else document.exitFullscreen?.();
   }
 
+  /* 조작 막대의 "07 / 13"을 누르면 번호 입력 → Enter로 이동, Esc·바깥 누르면 취소 */
+  openJump() {
+    const bar = document.getElementById('bar'), inp = document.getElementById('jumpInput');
+    document.getElementById('jumpTotal').textContent = '/ ' + String(this.slides.length).padStart(2, '0');
+    inp.value = String(this.cur + 1);
+    bar.classList.add('jumping');
+    inp.focus(); inp.select();
+  }
+  closeJump(go) {
+    const bar = document.getElementById('bar'), inp = document.getElementById('jumpInput');
+    if (!bar.classList.contains('jumping')) return;
+    const n = parseInt(inp.value, 10);
+    bar.classList.remove('jumping');
+    if (go && Number.isFinite(n)) this.go(n - 1);  // 범위 밖이면 go()가 첫·끝 장으로 맞춤
+    inp.blur();
+  }
+
   bind() {
+    const inp = document.getElementById('jumpInput');
+    inp.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); this.closeJump(true); }
+      else if (e.key === 'Escape') { e.preventDefault(); this.closeJump(false); }
+    });
+    inp.addEventListener('input', () => { inp.value = inp.value.replace(/\D/g, '').slice(0, 3); });
+    inp.addEventListener('blur', () => this.closeJump(false));
     addEventListener('resize', this.fit);
     addEventListener('hashchange', () => this.go(this.fromHash(), false));
     document.addEventListener('keydown', (e) => {
@@ -906,7 +969,7 @@ class Deck {
         prev: () => this.prev(), next: () => this.next(), first: () => this.go(0),
         toc: () => this.toggleToc(true), 'toc-close': () => this.toggleToc(false),
         theme: () => this.setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'),
-        full: () => this.toggleFull(), reload: () => this.reloadDemo(),
+        full: () => this.toggleFull(), reload: () => this.reloadDemo(), jump: () => this.openJump(),
       })[act]?.();
     });
     document.getElementById('toc').addEventListener('click', (e) => { if (e.target.id === 'toc') this.toggleToc(false); });
@@ -933,6 +996,5 @@ new Deck();
   });
 })();
 </script>
-<script>if(navigator.webdriver)document.querySelectorAll('.theme-pick,.keyhint').forEach(e=>e.style.display='none')</script>
 </body>
 </html>

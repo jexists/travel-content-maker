@@ -19,6 +19,7 @@
 - v5(2026-11-10): 마지막에 감사합니다 표지(목차 제외). 공용 dev-ppt-maker template.html이 12:08에 바뀌어 v5 HTML은 바뀌기 전 결과에 표지만 끼워 넣음 — build.py로 다시 만들면 새 템플릿 모양이 됨. 실행 방법 4단계(① 앱 ② 스킬 ③ 목소리 키 `.env` ④ 쓰기), 스킬 zip에 `.env.example` 포함(스킬 폴더 `.env`로 OpenAI TTS 확인), 효과·한계는 사용자 문장대로, 마지막 장은 확장 3단계만.
 - 숏폼 대본 규칙(2026-11-11): smartdong-2team/blog2shorts `script_prompts.py`를 참고해 `references/prompts/shorts.md`를 다시 씀 — 훅 문구 두 줄 명사형(20자·`\n`), 첫 문장은 구체적 약속, 장면당 정보 하나, 문장 35자·해요체·질문 어미, cta는 저장 유도(인사·구독 금지), 자체 점검 6가지. 글 규칙은 `check_rules.script_rows`가 영상 만들기 전에 검사해 어기면 TTS 없이 멈춤(`rules.json` youtube.script), B 카드에도 표시. 훅 문구·`subtitle`의 `\n` 줄바꿈 지원.
 - 숏폼 화면 배치(2026-11-11): 사진을 화면 가득 채우던 방식 → 가운데 정사각 사진 + 위아래 흐린 배경(같은 사진, 82% 어둡게) + 위 띠 훅 문구 + 사진 아래쪽 검은 박스 자막. `settings.json` shorts.layout(`bg_dim` 등)·subtitle.box로 조정, `mode: "full"`이면 예전 방식.
+- 발표 v5 숏폼 그림(2026-11-11): C-002 승인 대본을 새 배치로 다시 렌더한 캡처 `captures/shorts_hook_v5.jpg`·`shorts_frames_v5.jpg`로 교체(같은 OpenAI 음성 캐시, 27.5초). 숏폼 장 설명에 배치·대본 점검 추가. v1~v4는 예전 캡처 그대로. HTML 3판·PDF 3개(판 번호 없는 이름) 다시 만듦.
 - v4(2026-11-10): 흐름도 그림만(테두리·빈칸 없음), 표 초록 강조 줄 제거, 구성도 가로판(`architecture_v3`), Python은 첫 실행 때 Claude가 설치(winget·brew·uv, SKILL.md 준비 문제 해결), 첫 실행 장 터미널 모양, 효과·한계 카드.
 - 문서·발표는 `_v2`로 새로 만듦(이전 PDF·HTML 보존). 최신은 `_v3`: 목차 3열, 업무 소개 카드, 근거 열 삭제, 개선 설계 비교 행·5칸 흐름, 구성도 크게, "과제 완료" 카드, 실행 방법은 실제 캡처(claude.ai/download·python.org) + 예시 그림(`docs/presentation/illust/`).
 

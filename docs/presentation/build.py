@@ -5,6 +5,9 @@ python3 docs/presentation/build.py [_v2]
   analysis.html  업무 분석 · 개선 설계 (구현물·한계 포함)
   run.html       실행 방법
 PDF는 export_pdfs.sh.
+
+2026.11.11 스킬 템플릿 갱신(목차 순서·장 번호·표지 선·PDF 숨김·.fit·.term이 템플릿에 들어감)에 맞춰
+같은 일을 하던 덮어쓰기 코드를 지웠다. v1~v4 HTML·PDF는 예전 템플릿으로 만든 결과라 다시 빌드하지 않는다.
 """
 import re
 from pathlib import Path
@@ -16,8 +19,6 @@ TOKENS_LIGHT = {"--accent": "#0F6E56", "--accent-ink": "#0B5A46", "--accent-c": 
 TOKENS_DARK = {"--accent": "#3CC39A", "--accent-ink": "#6FD9B5", "--accent-c": "#10261F"}
 EXTRA_CSS = """
 /* travel-content 추가 */
-.fit { background: #fff; border: 1.5px solid var(--shot-line); border-radius: 14px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-.fit img { width: 100%; height: 100%; object-fit: contain; display: block; }
 .need-cap { border: 3px dashed var(--subtle); border-radius: 14px; background: var(--card2); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; text-align: center; padding: 30px; color: var(--muted); }
 .need-cap b { font-size: 30px; color: var(--ink); }
 .need-cap span { font-size: 22px; line-height: 1.5; }
@@ -25,12 +26,8 @@ pre.code-out { font: 500 22px/1.55 var(--font-mono); background: var(--card2); b
 ol.nums { padding-left: 34px; display: flex; flex-direction: column; gap: 10px; font-size: 25px; }
 ol.nums li::marker { font-family: var(--font-mono); color: var(--accent); font-weight: 700; }
 code { font-family: var(--font-mono); font-size: .9em; }
-/* 표지: 초록 막대가 kicker~발표자까지 감싸도록, 버튼·안내 간격 */
-.cover .bar { display: none; }
 .cover .inner { max-width: 1500px; }
-.cover .ctext { display: flex; flex-direction: column; gap: 28px; border-left: 14px solid var(--accent); margin-left: -64px; padding: 6px 0 6px 50px; }
-.cover .keyhint { margin-top: 18px; }
-.toc-grid { grid-template-columns: repeat(4, 1fr); gap: 0 44px; }
+.toc-grid { gap: 0 44px; }  /* 열 수는 DECK.tocCols */
 
 """
 V4_CSS = """
@@ -89,7 +86,7 @@ VARIANTS = {
 WHO = "정주애 · 2026.11.11"
 V3_CSS = """
 /* v3: 카드 · 비교 행 · 5칸 흐름 · 완료 카드 */
-.toc-grid { grid-template-columns: repeat(3, 1fr); gap: 0 64px; }
+.toc-grid { gap: 0 64px; }
 .cards3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
 .card { background: var(--card); border: 1.5px solid var(--line); border-radius: 16px; padding: 28px 32px; border-top: 6px solid var(--accent); }
 .card .lb { font: 700 19px var(--font-mono); color: var(--accent); }
@@ -145,6 +142,7 @@ def build(ver=""):
     tpl = tokens(tpl, 'html[data-theme="dark"]', TOKENS_DARK)
     tpl = tpl.replace("</style>", EXTRA_CSS + (V3_CSS if ver >= "_v3" else "") + (V4_CSS if ver >= "_v4" else "") + (V5_CSS if ver >= "_v5" else "") + "</style>", 1)
     ncol = 3 if ver >= "_v3" else 4  # v1·v2는 4열 그대로
+    tpl = tpl.replace("tocCols: 3,", f"tocCols: {ncol},", 1)
     tpl = re.sub(r"<template id=\"opt-[^\"]+\">.*?</template>\s*", "", tpl, flags=re.S)  # 쓰지 않는 선택 조각 제거
     # 내용 장 자리 표시 1장을 지운다 (목차 장 다음 ~ </main>)
     toc_end = tpl.index("</section>", tpl.index('data-title="목차"')) + len("</section>")
@@ -159,20 +157,11 @@ def build(ver=""):
             v["sub"] = "스킬 zip 하나로 4단계 · Mac·Windows" if ver >= "_v5" else "스킬 zip 하나로 3단계 · Mac·Windows"
         chosen = [b for p, b in zip(slides, blocks) if v["parts"] is None or p in v["parts"]]
         html = head + "\n\n" + "\n\n".join(chosen) + "\n\n" + tail
-        html = re.sub(r'(<div class="kicker r">\{\{행사·과목 이름\}\}</div>.*?<div class="who r">.*?</div>)',
-                      r'<div class="ctext">\1</div>', html, count=1, flags=re.S)
         html = html.replace('<h1 class="r">{{발표 제목}}</h1>', f'<h1 class="r">{v.get("h1", v["title"])}</h1>', 1)
         html = (html.replace("{{발표 제목}}", v["title"]).replace("{{행사·과목 이름}}", v["kicker"])
                     .replace("{{한 줄 설명 — 명사형}}", v["sub"]).replace("{{발표자}} · {{YYYY.MM.DD}}", WHO))
-        # 목차: 섹션을 순서대로 왼쪽 열부터 채운다 (원래 템플릿은 가장 가벼운 열에 넣어 순서가 섞였음)
-        html = html.replace("const k = load.indexOf(Math.min(...load));  // 가장 가벼운 열에\n        cols[k].appendChild(g); load[k] += items.length + 1;",
-                            "const size = items.length + 1; if (c < NCOL - 1 && load[c] > 0 && load[c] + size / 2 > per) c += 1;\n        cols[c].appendChild(g); load[c] += size;")
-        html = html.replace("const cols = [0, 1, 2].map(", f"const cols = {list(range(ncol))}.map(")
-        html = html.replace("const load = [0, 0, 0];", f"const load = {[0] * ncol}; let c = 0; const per = [...groups].reduce((a, [, it]) => a + it.length + 1, 0) / {ncol};")
-        html = html.replace("NCOL - 1", str(ncol - 1))
         if v["parts"] is not None:  # 부분판은 목차 번호가 달라지므로 kicker의 섹션 번호를 뺀다
-            html = re.sub(r'<div class="kicker">\d\d · ', '<div class="kicker">', html)
-        html = html.replace("</body>", "<script>if(navigator.webdriver)document.querySelectorAll('.theme-pick,.keyhint').forEach(e=>e.style.display='none')</script>\n</body>", 1)
+            html = html.replace("kickerNo: true,", "kickerNo: false,", 1)
         left = re.findall(r"\{\{[^}]+\}\}", html)
         if left:
             raise SystemExit(f"{name}: 남은 자리 표시 {left[:5]}")

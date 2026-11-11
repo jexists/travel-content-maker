@@ -53,7 +53,7 @@
   <div class="chips-rows body r">
     <div class="chips-row"><div class="lbl"><b>사진</b><span>insta.py</span></div><div class="list"><span class="chip"><b>1</b>20장 초과 시 AI 20장</span><span class="chip"><b>2</b>GPS·EXIF 제거</span><span class="chip"><b>3</b>번호 시트</span><span class="chip"><b>4</b>내 폴더로 교체</span></div></div>
     <div class="chips-row"><div class="lbl"><b>인스타</b><span>render_cards</span></div><div class="list"><span class="chip"><b>5</b>첫 장 표지 디자인</span><span class="chip"><b>6</b>2장부터 원본 사진</span><span class="chip"><b>7</b>캡션·해시태그</span></div></div>
-    <div class="chips-row"><div class="lbl"><b>숏폼</b><span>make_shorts</span></div><div class="list"><span class="chip"><b>8</b>OpenAI TTS</span><span class="chip"><b>9</b>자막·훅 문구</span><span class="chip"><b>10</b>줌·전환 9:16</span></div></div>
+    <div class="chips-row"><div class="lbl"><b>숏폼</b><span>make_shorts</span></div><div class="list"><span class="chip"><b>8</b>OpenAI TTS</span><span class="chip"><b>9</b>자막·훅 문구</span><span class="chip"><b>10</b>정사각·흐린 배경 9:16</span></div></div>
     <div class="chips-row"><div class="lbl"><b>블로그</b><span>build_blog</span></div><div class="list"><span class="chip"><b>11</b>글→사진→글</span><span class="chip"><b>12</b>제목 후보 5개</span><span class="chip"><b>13</b>HTML·Markdown</span></div></div>
     <div class="chips-row"><div class="lbl"><b>관리</b><span>state·ledger</span></div><div class="list"><span class="chip"><b>14</b>규칙 자동 점검</span><span class="chip"><b>15</b>순서 강제·승인</span><span class="chip"><b>16</b>콘텐츠대장</span><span class="chip"><b>17</b>결과물 ✅/❌</span></div></div>
   </div>
@@ -139,7 +139,7 @@
       <div class="ar"><svg viewBox="0 0 44 24"><path d="M0,10 H32 V2 L44,12 L32,22 V14 H0 Z"/></svg></div>
       <div class="st"><div class="no">5</div><div class="nm2">기록</div><div class="d">모든 일을 대장에 한 줄씩</div><div class="eg">ledger.xlsx · 컨펌·승인·링크</div><div class="who">시스템</div></div>
     </div>
-    <div class="loopnote r"><span class="badge b-warn">되돌림</span>자동 점검(카드 수·해시태그·글자 수·영상 길이) 실패 또는 반려 → 2 만들기로 돌아가 v2 생성</div>
+    <div class="loopnote r"><span class="badge b-warn">되돌림</span>자동 점검(카드 수·해시태그·대본 규칙·글자 수·영상 길이) 실패 또는 반려 → 2 만들기로 돌아가 v2 생성</div>
     <div class="stats r"><div><b style="font-size:28px">비용</b><span>Claude Code 구독 + OpenAI TTS 사용량(선택, 없으면 OS 기본 음성)</span></div><div><b style="font-size:28px">배포·운영</b><span>스킬 zip 하나 · Mac·Windows · 규칙·디자인은 rules.json·settings.json</span></div></div>
   </div>
 </section>
@@ -161,9 +161,9 @@
 <section class="slide" data-part="impl" data-title="결과물 · 숏폼" data-section="구현물">
   <div class="head"><div><div class="kicker">05 · 구현물</div><h2 class="title">숏폼 · 대본·TTS·자막 27.5초</h2></div></div>
   <div class="row body r" style="gap:36px">
-    <div class="col" style="width:400px;flex:none"><div class="fit" style="height:700px"><img src="captures/shorts_hook.jpg" alt="숏폼 첫 장면"></div><div class="cap"><span class="code">hook</span>위쪽 훅 문구 고정</div></div>
-    <div class="col f1"><div class="fit" style="height:430px"><img src="captures/shorts_frames.jpg" alt="숏폼 장면별 프레임"></div><div class="cap"><span class="code">6장면</span>표지 → 안내판 → 포토존 → 조형물 → 청자타워 → 안내도</div>
-      <ul class="bullets" style="margin-top:24px"><li style="font-size:24px">문장 단위 TTS 길이 = 장면 길이</li><li style="font-size:24px">자동 점검 · 1080×1920 · 음성 끝까지 · 자막 안전 영역</li></ul></div>
+    <div class="col" style="width:400px;flex:none"><div class="fit" style="height:700px"><img src="captures/shorts_hook_v5.jpg" alt="숏폼 첫 장면"></div><div class="cap"><span class="code">hook</span>위 띠 훅 문구 · 가운데 사진</div></div>
+    <div class="col f1"><div class="fit" style="height:430px"><img src="captures/shorts_frames_v5.jpg" alt="숏폼 장면별 프레임"></div><div class="cap"><span class="code">6장면</span>표지 → 안내판 → 포토존 → 조형물 → 청자타워 → 안내도</div>
+      <ul class="bullets" style="margin-top:24px"><li style="font-size:24px">정사각 사진 + 위아래 흐린 배경 · 자막은 검은 박스</li><li style="font-size:24px">대본 규칙 먼저 점검 · 해요체 · 문장 35자 · 훅 20자</li><li style="font-size:24px">문장 단위 TTS 길이 = 장면 길이 · 1080×1920 · 자막 안전 영역</li></ul></div>
   </div>
 </section>
 
@@ -276,7 +276,7 @@
       <div class="cap" style="margin-top:18px"><span class="code">결과</span>사진 폴더/work/C-001_장소/ · OUTPUTS.md에서 한 번에 열기</div></div>
     <div class="row f1" style="gap:20px;align-items:flex-start">
       <div class="col f1"><div class="fit" style="height:560px"><img src="captures/insta_cover.jpg" alt="인스타 표지"></div><div class="cap"><span class="code">instagram/v1</span>카드 · 캡션</div></div>
-      <div class="col f1"><div class="fit" style="height:560px"><img src="captures/shorts_hook.jpg" alt="숏폼 첫 장면"></div><div class="cap"><span class="code">youtube/v1</span>shorts.mp4</div></div>
+      <div class="col f1"><div class="fit" style="height:560px"><img src="captures/shorts_hook_v5.jpg" alt="숏폼 첫 장면"></div><div class="cap"><span class="code">youtube/v1</span>shorts.mp4</div></div>
       <div class="col f1"><div class="fit" style="height:560px"><img src="captures/blog_top.png" alt="블로그 미리보기"></div><div class="cap"><span class="code">tistory/v1</span>preview.html</div></div>
     </div>
   </div>
