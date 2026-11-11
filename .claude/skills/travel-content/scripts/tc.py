@@ -133,6 +133,10 @@ def _render(a, p, ch, content, st, out_dir, cfg):
         ig_dir = p["work"] / "instagram" / f"v{ig['version']}"
         script = content["youtube"].get("script")
         if script:
+            from check_rules import script_rows  # 대본 글 규칙을 먼저 본다 (TTS 과금 전에)
+            bad = [f"{i}: {d}" for i, ok, d in script_rows(script) if not ok]
+            if bad:
+                raise SystemExit("대본 규칙 위반 — 대본을 고쳐 다시 build\n  " + "\n  ".join(bad))
             scenes = []
             for sc in script["scenes"]:
                 if sc["photo"] == "cover":  # 표지 사진을 화면 가득 (릴스는 첫 프레임이 가장 강해야 함)

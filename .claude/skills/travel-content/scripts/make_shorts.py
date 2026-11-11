@@ -3,7 +3,9 @@
 새 방식 (content.youtube.script 가 있을 때):
   대본 장면마다 사진 1장 + 내레이션. 문장 단위 TTS(macOS say) → 실제 길이로 장면 길이를 정하고,
   자막은 Pillow로 PNG를 그려 overlay 한다 (이 ffmpeg에는 drawtext/subtitles 필터가 없음).
-  장면 움직임은 1.2초 동안만 부드럽게 줌·팬하고 멈춘다 (blog2shorts 방식), 장면 사이 xfade.
+  화면 배치(settings shorts.layout): 위아래는 같은 사진을 흐리고 어둡게 깐 배경, 가운데 정사각 사진,
+  훅 문구는 위 띠, 자막은 사진 아래쪽에 검은 박스 (blog2shorts 배치를 세로 사진에 맞게). mode "full"이면 예전처럼 화면 가득.
+  장면 움직임은 1.2초 동안만 부드럽게 줌·팬하고 멈춘다 (blog2shorts 방식, 사진 영역 안에서만), 장면 사이 xfade.
   결과: shorts.mp4, voice.m4a, subtitles.srt, script.txt, meta.txt, timeline.json
 
 옛 방식 (script 가 없을 때): 컨펌된 인스타 카드를 장당 2.5초씩 이어 붙인다 (make_slideshow).
@@ -72,6 +74,11 @@ def _balanced_two(text, fnt, max_w, d):
 def wrap_pages(text, fnt, max_w, max_lines=2):
     """자막 페이지: 띄어쓰기 단위로 max_w 픽셀 안에 줄을 채우고, max_lines 줄씩 한 페이지."""
     d = ImageDraw.Draw(Image.new("L", (1, 1)))
+    if "\n" in text:  # 사람이 직접 줄을 나눈 경우 그대로 (뜻 단위 줄바꿈). 너무 길면 자동으로.
+        lines = [l.strip() for l in text.split("\n") if l.strip()]
+        if all(d.textlength(l, font=fnt) <= max_w for l in lines):
+            return [lines[i:i + max_lines] for i in range(0, len(lines), max_lines)]
+        text = " ".join(lines)
     if d.textlength(text, font=fnt) <= max_w:
         return [[text]]
     if max_lines >= 2:
@@ -110,11 +117,19 @@ def subtitle_png(lines, path, cfg, center_y):
     lh = round(S["size"] * 1.32)
     top = round(center_y - lh * len(lines) / 2)
     boxes = []
+    pad = S.get("box_padding", 14)
     for i, line in enumerate(lines):
         tw = d.textlength(line, font=fnt)
         x, y = round((W - tw) / 2), top + i * lh
-        d.text((x, y), line, font=fnt, fill="white", stroke_width=S["stroke"], stroke_fill=(0, 0, 0, 235))
-        boxes.append(d.textbbox((x, y), line, font=fnt, stroke_width=S["stroke"]))
+        if S.get("box"):  # 줄마다 검은 박스 (어떤 사진 위에서도 읽히게)
+            l, tp, r, b = d.textbbox((x, y), line, font=fnt)
+            box = [l - pad, tp - pad, r + pad, b + pad]
+            d.rectangle(box, fill=(0, 0, 0, round(255 * S.get("box_opacity", 1))))
+            d.text((x, y), line, font=fnt, fill="white")
+            boxes.append(box)
+        else:
+            d.text((x, y), line, font=fnt, fill="white", stroke_width=S["stroke"], stroke_fill=(0, 0, 0, 235))
+            boxes.append(d.textbbox((x, y), line, font=fnt, stroke_width=S["stroke"]))
     im.save(path)
     return [min(b[0] for b in boxes), min(b[1] for b in boxes), max(b[2] for b in boxes), max(b[3] for b in boxes)]
 
@@ -254,27 +269,33 @@ def write_wav(path, pcm):
 
 # ---------------------------------------------------------------- 화면
 
-def frame_image(src, out, contain=False):
-    """2배 해상도(2160×3840) 바탕 이미지. 사진은 비율 유지로 꽉 채우고(늘이지 않음),
+def frame_image(src, out, contain=False, size=(W, H)):
+    """2배 해상도 사진 이미지(size×2). 사진은 비율 유지로 꽉 채우고(늘이지 않음),
     contain=True(표지 카드)면 글자가 잘리지 않게 전부 보이게 놓고 뒤를 흐린 사진으로 채운다."""
     im = open_rgb(src)
-    big = (W * 2, H * 2)
+    big = (size[0] * 2, size[1] * 2)
     bg = ImageOps.fit(im, big, method=Image.LANCZOS)
     if contain:
         bg = bg.filter(ImageFilter.GaussianBlur(40)).point(lambda v: int(v * 0.6))
-        fg = im.copy()
-        fg.thumbnail(big, Image.LANCZOS)
-        if fg.width < big[0]:
-            fg = fg.resize((big[0], round(fg.height * big[0] / fg.width)), Image.LANCZOS)
+        k = min(big[0] / im.width, big[1] / im.height)
+        fg = im.resize((round(im.width * k), round(im.height * k)), Image.LANCZOS)
         bg.paste(fg, ((big[0] - fg.width) // 2, (big[1] - fg.height) // 2))
     bg.save(out, quality=92)
+    return out
+
+
+def backdrop(src, out, L):
+    """위아래 띠 배경: 같은 사진을 화면 가득 채워 흐리게 하고 bg_dim만큼 어둡게 (0=원본, 1=검정)."""
+    im = ImageOps.fit(open_rgb(src), (W, H), method=Image.LANCZOS).filter(ImageFilter.GaussianBlur(L.get("bg_blur", 40)))
+    im = Image.blend(im, Image.new("RGB", (W, H), "black"), L.get("bg_dim", 0.82))
+    im.save(out, quality=92)
     return out
 
 
 MOTIONS = ["zoom_in", "pan_right", "zoom_out", "pan_left"]
 
 
-def zoompan(motion, frames, cfg):
+def zoompan(motion, frames, cfg, size=(W, H)):
     k = max(1, round(cfg["motion_seconds"] * FPS))
     z = cfg["zoom"]
     p = f"min(on/{k},1)"
@@ -287,7 +308,7 @@ def zoompan(motion, frames, cfg):
         zz, xx = f"{1 + z}", f"(iw-iw/zoom)*(0.35+0.3*{s})"
     else:
         zz, xx = f"{1 + z}", f"(iw-iw/zoom)*(0.65-0.3*{s})"
-    return f"zoompan=z='{zz}':x='{xx}':y='ih/2-(ih/zoom/2)':d={frames}:s={W}x{H}:fps={FPS}"
+    return f"zoompan=z='{zz}':x='{xx}':y='ih/2-(ih/zoom/2)':d={frames}:s={size[0]}x{size[1]}:fps={FPS}"
 
 
 def ffmpeg(*args):
@@ -312,7 +333,7 @@ def hook_png(text, path, cfg):
     im = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     d = ImageDraw.Draw(im)
     lh = round(size * 1.25)
-    top = Hk["top"]
+    top = Hk["top"] if "center_y" not in Hk else round(Hk["center_y"] - (lh * (len(lines) - 1) + size) / 2)
     boxes = []
     for i, line in enumerate(lines):
         tw = d.textlength(line, font=fnt)
@@ -333,6 +354,8 @@ def make(scenes, out_dir, meta, cfg, hook_text=None, cache_dir=None):
     engines = set()
     T, lead, tail = S["transition"], 0.15, S["transition"] + S["scene_pad"]
     sub_font = font_file(S["subtitle"]["font"], S["subtitle"]["size"])
+    L = S.get("layout") or {}
+    square = L.get("mode", "full") == "square"
     pause = bytes(int(RATE * S["sentence_pause"]) * 2)
     timeline, pcm_all, srt, script = [], bytearray(), [], []
     t0 = 0.0  # 이 장면이 영상에서 시작하는 시각
@@ -373,17 +396,26 @@ def make(scenes, out_dir, meta, cfg, hook_text=None, cache_dir=None):
             if len(pcm_all) < start_sample:
                 pcm_all += bytes(start_sample - len(pcm_all))
             pcm_all[start_sample:start_sample + len(pcm)] = pcm
-            # 자막 PNG: 표지(contain) 장면은 카드 글씨를 가리지 않게 위쪽에
-            cy = 330 if sc.get("contain") else S["subtitle"]["center_y"]
-            inputs, chain = ["-i", frame_image(sc["src"], tmp / f"bg{i}.jpg", sc.get("contain"))], ""
-            label = "[v0]"
-            chain = f"[0]{zoompan(MOTIONS[i % len(MOTIONS)], frames, S)},format=yuv420p{label}"
+            motion, label = MOTIONS[i % len(MOTIONS)], "[v0]"
+            if square:  # 흐린 배경 + 가운데 정사각 사진 (움직임은 사진 안에서만)
+                cy = S["subtitle"]["center_y"]
+                ps = (L["photo_size"], L["photo_size"])
+                inputs = ["-loop", "1", "-i", backdrop(sc["src"], tmp / f"bd{i}.jpg", L),
+                          "-i", frame_image(sc["src"], tmp / f"bg{i}.jpg", sc.get("contain"), ps)]
+                chain = (f"[1]{zoompan(motion, frames, S, ps)}[ph];"
+                         f"[0][ph]overlay={(W - ps[0]) // 2}:{L['photo_y']}:shortest=1,format=yuv420p{label}")
+                first = 2
+            else:  # 화면 가득 (예전 방식). 표지(contain) 장면은 카드 글씨를 가리지 않게 자막을 위쪽에
+                cy = 330 if sc.get("contain") else S["subtitle"]["center_y"]
+                inputs = ["-i", frame_image(sc["src"], tmp / f"bg{i}.jpg", sc.get("contain"))]
+                chain = f"[0]{zoompan(motion, frames, S)},format=yuv420p{label}"
+                first = 1
             for k, pg in enumerate(pages):
                 png = tmp / f"sub{i}_{k}.png"
                 pg["box"] = subtitle_png(pg["lines"], png, S, cy)
                 inputs += ["-i", png]
                 nxt = f"[v{k + 1}]"
-                chain += f";{label}[{k + 1}]overlay=0:0:enable='between(t,{pg['start']},{pg['end']})'{nxt}"
+                chain += f";{label}[{k + first}]overlay=0:0:enable='between(t,{pg['start']},{pg['end']})'{nxt}"
                 label = nxt
                 srt.append((t0 + pg["start"], t0 + pg["end"], "\n".join(pg["lines"])))
             seg = tmp / f"seg{i}.mp4"
@@ -392,7 +424,7 @@ def make(scenes, out_dir, meta, cfg, hook_text=None, cache_dir=None):
             segs.append((seg, dur_scene))
             timeline.append({"scene": i + 1, "id": sc["id"], "role": sc.get("role", "body"), "start": round(t0, 3),
                              "duration": round(dur_scene, 3), "speech_end": round(t0 + speech_end, 3),
-                             "motion": MOTIONS[i % len(MOTIONS)], "contain": bool(sc.get("contain")), "pages": pages})
+                             "motion": motion, "contain": bool(sc.get("contain")) and not square, "pages": pages})
             t0 += dur_scene - (0 if last else T)
         total = t0
         # 영상: xfade로 이어 붙이고 끝을 페이드아웃

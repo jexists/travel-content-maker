@@ -64,11 +64,14 @@
       "size": 64,
       "max_width": 860,
       "max_lines": 2,
-      "center_y": 1440,
+      "center_y": 1330,
       "stroke": 6,
-      "safe_top": 1250,
-      "safe_bottom": 1650,
-      "safe_side": 90
+      "safe_top": 1200,
+      "safe_bottom": 1500,
+      "safe_side": 90,
+      "box": true,
+      "box_opacity": 1,
+      "box_padding": 14
     },
     "engine": "openai",
     "openai": {
@@ -82,7 +85,16 @@
       "size": 84,
       "max_width": 940,
       "top": 250,
-      "stroke": 7
+      "stroke": 7,
+      "center_y": 220
+    },
+    "layout": {
+      "_설명": "화면 배치. square = 위아래 흐린 배경(같은 사진) + 가운데 정사각 사진. bg_dim 0~1 (클수록 어두움, 0.82 권장). full = 사진을 화면 가득.",
+      "mode": "square",
+      "photo_size": 1080,
+      "photo_y": 420,
+      "bg_blur": 40,
+      "bg_dim": 0.82
     }
   },
   "confirmation": {

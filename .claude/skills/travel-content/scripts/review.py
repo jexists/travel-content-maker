@@ -187,10 +187,14 @@ def point_script(work):
     sc = (yt.get("script") or {}).get("scenes", [])
     chars = sum(len(s.get("narration", "")) for s in sc)
     L = [f"## [B] 영상 제목·대본 — {st['id']} {st['place']} (제작 전)", "",
-         f"- 제목: {yt.get('title', '')}", f"- 화면 위 훅 문구: 「{(yt.get('script') or {}).get('hook_text', '')}」",
+         f"- 제목: {yt.get('title', '')}", f"- 화면 위 훅 문구: 「{(yt.get('script') or {}).get('hook_text', '').replace(chr(10), ' / ')}」",
          f"- 장면 {len(sc)}개 · 내레이션 {chars}자 (약 {chars / 6.5:.0f}초 예상, 기준 15~30초) · 목소리는 설정 기본값", "",
          "| # | 사진 | 내레이션 |", "| --- | --- | --- |"]
     L += [f"| {i} | {s.get('photo')} | {s.get('narration')} |" for i, s in enumerate(sc, 1)]
+    if yt.get("script"):
+        from check_rules import script_rows
+        bad = [f"{n}: {d}" for n, ok, d in script_rows(yt["script"]) if not ok]
+        L += ["", "- 대본 글 규칙: " + ("모두 통과" if not bad else "**고칠 것** — " + " · ".join(bad))]
     L += ["", ANS + ": `이대로` · 고칠 장면·문장·제목", "승인하면 영상을 만들고(점검 통과 시 컨펌 기록), 블로그 제목·내용(C)을 준비해요."]
     return "\n".join(L)
 

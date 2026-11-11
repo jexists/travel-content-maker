@@ -30,7 +30,7 @@ description: 여행 사진 폴더와 여행지 이름을 받아 인스타 카드
 | 음성 없음 | Windows 설정 > 시간 및 언어 > 음성에서 한국어 음성 추가 안내, 또는 OpenAI 키 | `.env`에 키 넣기 |
 | 그 밖 | 오류 원문을 보여 주고 원인·해결 한 줄 | — |
 - 스크립트가 `거절:`로 끝나면 순서·조건 위반이다. 이유를 그대로 전하고 우회하지 않는다.
-- 기본값 `references/settings.json`(표지 디자인, 블로그 배치, 목소리·자막) — 묻지 않는다. 채널 문구 규칙 `references/prompts/`(`common.md` → `instagram.md`·`shorts.md`·`blog.md`·`blog_plog.md`), 확인 지점 규칙 `references/prompts/confirm.md`.
+- 기본값 `references/settings.json`(표지 디자인, 블로그 배치, 목소리·자막, 숏폼 화면 배치 `shorts.layout`) — 묻지 않는다. 채널 문구 규칙 `references/prompts/`(`common.md` → `instagram.md`·`shorts.md`·`blog.md`·`blog_plog.md`), 확인 지점 규칙 `references/prompts/confirm.md`.
 - **토큰·시간 절약**: 확인 지점마다 카드 1개(`tc.py review --stage …` 출력) + 이미지 1장만 보낸다. 중간 진행은 한 줄로만 알리고, 같은 내용을 다시 설명하지 않는다.
 
 ## 흐름
@@ -50,9 +50,9 @@ description: 여행 사진 폴더와 여행지 이름을 받아 인스타 카드
   - `내가 고를게` → `tc.py insta-mine` 경로만 알려 주고 ⏸. "넣었어"면 `insta-use --dir insta_mine` 후 준비 3·5를 다시 해서 A 카드를 한 번 더(그 밖의 항목은 유지).
 
 ### B. 영상 제목·대본 ⏸ (제작 전)
-- `shorts.md`대로 `content.youtube`(제목·설명·태그·`script.hook_text`·`scenes`)를 쓴다. 사진·순서 = 확정된 인스타 순서, 첫 장면 `"cover"`.
+- `shorts.md`대로 `content.youtube`(제목·설명·태그·`script.hook_text`·`scenes`)를 쓴다. 사진·순서 = 확정된 인스타 순서, 첫 장면 `"cover"`. 훅 문구는 두 줄 명사형(20자 이내), 첫 문장은 구체적인 약속, 보여 주기 전에 `shorts.md` 자체 점검 6가지.
 - `tc.py review --stage script` 카드만 보낸다(이미지 없음).
-- `이대로`/수정 반영 → `tc.py build --ch youtube --confirm`. 점검 실패(길이 초과 등)는 대본을 줄여 다시 build.
+- `이대로`/수정 반영 → `tc.py build --ch youtube --confirm`. 대본 글 규칙(해요체·문장 35자·훅 길이 등)은 영상 만들기 전에 검사해 TTS 없이 멈추고, 영상 점검 실패(길이 초과 등)와 함께 대본을 고쳐 다시 build.
 
 ### C. 블로그 제목 5개 + 내용 ⏸
 - `tc.py tistory-photos --extra <정보 사진 ID>` → `blog.md`·`blog_plog.md`대로 `content.tistory`(제목 후보 5개, `blocks`) → `tc.py build --ch tistory`(컨펌 없이) → 점검 통과까지 고친다.

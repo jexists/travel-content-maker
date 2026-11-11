@@ -26,7 +26,18 @@
     "duration_max": 30,
     "width": 1080,
     "height": 1920,
-    "tags_min": 5
+    "tags_min": 5,
+    "script": {
+      "_설명": "숏폼 대본 글 규칙 (prompts/shorts.md). 영상을 만들기 전에 검사한다.",
+      "scenes_min": 5,
+      "scenes_max": 8,
+      "narration_total_min": 110,
+      "narration_total_max": 170,
+      "sentence_max": 35,
+      "hook_max": 20,
+      "filler_words": ["꿀팁", "알려드릴게요", "알려드려요", "효율적인", "차근차근", "체계적", "큰 도움이 돼요", "중요해요", "응원할게요", "힐링 그 자체", "인생샷", "강력 추천"],
+      "cta_endings_banned": ["감사합니다", "안녕", "응원", "구독", "좋아요 눌러", "알림 설정"]
+    }
   },
   "tistory": {
     "photos_min": 5,

@@ -19,6 +19,58 @@ def _probe(mp4):
             float(a.get("duration", 0)))
 
 
+def _sentences(text):
+    return [p.strip() for p in re.split(r"(?<=[.?!…])(?!\d)\s+", text.strip()) if p.strip()]
+
+
+def script_rows(script, R=None):
+    """숏폼 대본(content.youtube.script) 글 규칙 — 영상을 만들기 전에 검사한다 (references/prompts/shorts.md).
+    반환: [(항목, 통과, 설명)]"""
+    from difflib import SequenceMatcher
+    R = R or load(RULES)
+    S = R["youtube"].get("script", {})
+    rows = []
+    scenes = script.get("scenes", [])
+    n = len(scenes)
+    lo, hi = S.get("scenes_min", 5), S.get("scenes_max", 8)
+    rows.append(("장면 수", lo <= n <= hi, f"{n}개 (기준 {lo}~{hi})"))
+    roles = [s.get("role", "body") for s in scenes]
+    ok = n >= 2 and roles[0] == "hook" and roles[-1] == "cta" and all(r == "body" for r in roles[1:-1])
+    rows.append(("장면 구성 (hook → body → cta)", ok, " → ".join(roles)))
+    narr = [s.get("narration", "") for s in scenes]
+    total = sum(len(x) for x in narr)
+    tlo, thi = S.get("narration_total_min", 110), S.get("narration_total_max", 170)
+    rows.append(("내레이션 합계", tlo <= total <= thi, f"{total}자 (기준 {tlo}~{thi}자 ≈ 15~25초)"))
+    sents = [(i + 1, t) for i, x in enumerate(narr) for t in _sentences(x)]
+    smax = S.get("sentence_max", 35)
+    long_ = [f"장면{i} {len(t)}자" for i, t in sents if len(t) > smax]
+    rows.append(("한 문장 길이", not long_, f"모두 {smax}자 이하" if not long_ else ", ".join(long_)))
+    formal = [f"장면{i}: {t}" for i, t in sents if re.search(r"(니다|니까)[.?!…]?$", t)]
+    rows.append(("해요체 (합니다체 금지)", not formal, "모두 해요체" if not formal else " / ".join(formal)))
+    badq = [f"장면{i}: {t}" for i, t in sents if t.endswith("?") and not re.search(r"(죠|까요|나요)\?$", t)]
+    rows.append(("질문 어미 (~죠?·~까요?·~나요?)", not badq, "문제 없음" if not badq else " / ".join(badq)))
+    marks = [f"장면{i}" for i, t in sents if "!" in t]
+    rows.append(("느낌표 없음 (TTS 어색)", not marks, "없음" if not marks else ", ".join(marks)))
+    hook = script.get("hook_text", "")
+    if hook:
+        hl = [l for l in hook.split("\n") if l.strip()]
+        hmax = S.get("hook_max", 20)
+        hn = len("".join(hl))
+        rows.append(("훅 문구 길이", hn <= hmax and len(hl) <= 2, f"{hn}자 {len(hl)}줄 (기준 {hmax}자·2줄 이내)"))
+        sq = lambda s: re.sub(r"[\s.,?!…]", "", s)
+        first = _sentences(narr[0])[0] if narr and narr[0] else ""
+        sim = SequenceMatcher(None, sq(hook), sq(first)).ratio() if first else 0
+        rows.append(("훅 문구 ≠ 첫 문장", sim < 0.6, f"비슷한 정도 {sim:.0%} (60% 미만)"))
+    words = S.get("filler_words", []) + R["common"].get("banned_words", [])
+    alltext = hook + " " + " ".join(narr)
+    hit = [w for w in words if w in alltext]
+    rows.append(("빈말·금지어 없음", not hit, "없음" if not hit else ", ".join(hit)))
+    if narr:
+        ends = [w for w in S.get("cta_endings_banned", []) if w in narr[-1]]
+        rows.append(("마지막 장면 인사·응원·구독 요청 없음", not ends, "없음" if not ends else ", ".join(ends)))
+    return rows
+
+
 def check(ch, content, out_dir, best_dir=None, cfg=None):
     cfg = cfg or settings()
     R = load(RULES)
@@ -74,6 +126,9 @@ def check(ch, content, out_dir, best_dir=None, cfg=None):
         add("SEO 메인 키워드 (제목)", main.replace(" ", "") in yt["title"].replace(" ", ""), main)
         add("장소명 포함", place in text, place)
         add("태그 개수", len(yt["tags"]) >= r["tags_min"], f"{len(yt['tags'])}개 (최소 {r['tags_min']})")
+        if yt.get("script"):
+            for row in script_rows(yt["script"], R):
+                add("대본 · " + row[0], row[1], row[2])
         mp4 = Path(out_dir) / "shorts.mp4"
         tl = load(Path(out_dir) / "timeline.json")
         if mp4.exists() and mp4.stat().st_size:
